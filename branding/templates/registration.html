@@ -1,0 +1,46 @@
+
+<html>
+    <body>
+            <div id="container">
+                    <div class="header">
+                        <h1>Create Account</h1>
+                    </div>
+                    <form ation="{% url 'registration:register' %}" method="post">
+                        {% csrf_token %}
+                        <div id="form-control">
+                            <label>Fullname</label>
+                            <input name='name' class="form-control" type="text"  required>
+                        </div>
+                        <div id="form-control">
+                            <label>Username</label>
+                            <input name='username' class="form-control" type="text"  required>
+                        </div>
+                    
+                        <div id="form-control">
+                            <label>Email</label>
+                            <input name='email' class="form-control" type="email" required>
+                        </div>
+                       
+                        <div id="form-control">
+                            <label>Company name</label>
+                            <input name='companyname' class="form-control" required>
+                        
+                    </div>
+                        <div id="form-control">
+                            <label>Company Site</label>
+                            <input name='url'  class="form-control" type="url" required>
+                           
+                           
+                               <p>Already Have an Account</p>
+                                <div id="haveAnAccount">
+                                <a href=""><strong>Login</strong></a>
+                            </div>
+                            <button type="submit" id="submitButton">Register</button>
+                        </div>
+                    </form>
+                    
+                </div>
+
+    </body>
+</html>
+
