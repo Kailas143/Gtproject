@@ -14,6 +14,7 @@ class Stock_History(models.Model) :
     after_process = models.FloatField(null=True,blank=True)
     change_in_qty= models.FloatField(null=True,blank=True)
     process=models.CharField(max_length=1024)
+    date_time=models.DateTimeField(auto_now=True )
 
     def __str__(self):
         return self.process

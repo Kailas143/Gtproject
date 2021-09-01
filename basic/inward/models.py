@@ -15,9 +15,9 @@ class Dc_details(models.Model):
 
 class Dc_materials(models.Model):
     dc_details =models.ForeignKey(Dc_details,on_delete=models.CASCADE)
-    item =models.PositiveIntegerField()
-    qty =models.PositiveIntegerField()
-    bal_qty=models.PositiveIntegerField()
-    error_qty=models.IntegerField()
+    item = models.FloatField()
+    qty = models.FloatField() 
+    bal_qty= models.FloatField()
+    error_qty= models.FloatField()
 
     

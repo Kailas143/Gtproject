@@ -53,6 +53,7 @@ class Dc_MaterialsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.L
 
 
 class Dc_detailsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    permission_classes = [IsAuthenticated]
     serializer_class = Dc_details_serializers
     queryset = Dc_details.objects.all()
     lookup_field = 'id'
