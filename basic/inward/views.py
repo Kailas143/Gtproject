@@ -15,17 +15,26 @@ from .models import Dc_details, Dc_materials
 from .serializers import Dc_details_serializers, Dc_materials_serializers
 
 
-class DC_details_add(generics.GenericAPIView,APIView):
+class DC_details_add(generics.GenericAPIView,APIView,mixins.ListModelMixin):
     permission_classes = [IsAuthenticated]
     serializer_class = Dc_details_serializers
+    queryset = Dc_details.objects.all()
+   
+
+    def get(self, request):
+            company=requests.get('http://127.0.0.1:8000/company/details/').json()
+           
+            return Response(company)
 
     def post(self,request):
         serializer = Dc_details_serializers(
             data=request.data, context={'request': request})
         data = {}
+       
         if serializer.is_valid():
             company_idr = request.data['company_id']
             dc_number_r = request.data['dc_number']
+            
             dc = Dc_details.objects.filter(
                 company_id=company_idr, dc_number=dc_number_r).exists()
             if dc:
@@ -72,6 +81,7 @@ class Dc_detailsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.Lis
         if id:
             return self.retrieve(request,id)
         else:
+            
             return self.list(request)
 
     
@@ -98,6 +108,7 @@ class DC_materials_year(generics.GenericAPIView,mixins.ListModelMixin):
     queryset =Dc_materials.period.current_financialyear(current_finyear_start='2021-09-02',current_finyear_end='2021-09-03')
 
     def get(self,request):
+            
             return self.list(request)
 
 

@@ -14,7 +14,6 @@ urlpatterns = [
     path('dc/details/year/',views.DC_details_year.as_view(),name='DC_details_year'),
     path('dc/details/add/',views.DC_details_add.as_view(),name='DC_details_add'),
 
-
     path('login/',views.LoginAPI.as_view(),name='LoginAPI'),
     
     
