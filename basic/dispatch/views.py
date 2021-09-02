@@ -151,3 +151,17 @@ class Stock_HistoryAPI(generics.GenericAPIView, mixins.ListModelMixin, mixins.Re
 class LoginAPI(APIView):
     def post(self, request):
         return requests.get('http://127.0.0.1:8000/apigateway/api/login/').json()
+
+class Dispatch_details_year(generics.GenericAPIView,mixins.ListModelMixin):
+    serializer_class=Dispatch_details_serializers
+    queryset=Dispatch_details.period.current_financialyear(current_finyear_start='2021-09-02',current_finyear_end='2021-09-03')
+
+    def get(self,request):
+        return self.list(request)
+
+class Dispatch_materials_year(generics.GenericAPIView,mixins.ListModelMixin):
+    serializer_class=Dispatch_materials_serializers
+    queryset=Dispatch_materials.period.current_financialyear(current_finyear_start='2021-09-02',current_finyear_end='2021-09-03')
+
+    def get(self,request):
+        return self.list(request)

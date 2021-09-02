@@ -83,15 +83,21 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
         #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class Stock_HistoryAPI(generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin):
-    serializer_class = StockSerializer
-    queryset = Stock.objects.all()
-    lookup_field = 'id'
 
-    def get(self, request, id=None):
-        if id:
-            return self.retrieve(request)
-        else:
+class Stock_HistoryAPI(generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin):
+    serializer_class = Stock_History_Serializer
+    queryset = Stock_History.period.current_financialyear(current_year='2021-09-02',last_year='2021-09-03')
+     
+
+    def get(self, request):
+            return self.list(request)
+
+class Stock_Year_Report(generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin):
+    serializer_class = StockSerializer
+    queryset = Stock.period.current_financialyear(current_year='2021-09-02',last_year='2021-09-03')
+     
+
+    def get(self, request):
             return self.list(request)
 
 

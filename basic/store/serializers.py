@@ -14,4 +14,4 @@ class Stock_History_Serializer(serializers.ModelSerializer) :
   
     class Meta : 
         model = Stock_History
-        fields = ['stock_id','instock_qty']
+        fields = '__all__'
