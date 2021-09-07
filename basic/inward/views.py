@@ -9,8 +9,9 @@ from rest_framework.authentication import (BasicAuthentication,
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework import permissions
 from .models import Dc_details, Dc_materials
+from rest_framework.parsers import JSONParser
 # Create your views here.
 from .serializers import Dc_details_serializers, Dc_materials_serializers
 
@@ -19,14 +20,15 @@ class DC_details_add(generics.GenericAPIView,APIView,mixins.ListModelMixin):
     permission_classes = [IsAuthenticated]
     serializer_class = Dc_details_serializers
     queryset = Dc_details.objects.all()
-   
 
-    def get(self, request):
-            company=requests.get('http://127.0.0.1:8000/company/details/').json()
-           
-            return Response(company)
+    def get(self,request):
+        company=requests.get('http://127.0.0.1:8000/company/details/').json()
+        return Response(company)
+
 
     def post(self,request):
+        
+        print(self.company)
         serializer = Dc_details_serializers(
             data=request.data, context={'request': request})
         data = {}
@@ -112,3 +114,21 @@ class DC_materials_year(generics.GenericAPIView,mixins.ListModelMixin):
             return self.list(request)
 
 
+            
+class UserPermission(permissions.BasePermission,generics.GenericAPIView):
+
+    queryset=Dc_details.objects.all()
+    parser_classes = [JSONParser]
+    
+        
+    def get(self,request) :
+            user=requests.get('http://127.0.0.1:8000/user/').json()
+            user_list=[]
+            for u in user :
+                user_list.append(u)
+                print(u)
+          
+            user_n=json.dumps(user)
+            print(type(user_n))
+
+            return Response(user)

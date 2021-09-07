@@ -8,7 +8,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     class Meta :
         model = User 
-        fields = ['username','password','domain']
+        fields = ['username','password','domain','is_admin','is_employee']
     
     def save(self):
         reg=User(

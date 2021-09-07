@@ -15,6 +15,8 @@ urlpatterns = [
     path('dc/details/add/',views.DC_details_add.as_view(),name='DC_details_add'),
 
     path('login/',views.LoginAPI.as_view(),name='LoginAPI'),
+    path('api/',views.UserPermission.as_view(),name='UserPermission')
+
     
     
 

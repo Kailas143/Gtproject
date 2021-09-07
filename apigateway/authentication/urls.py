@@ -9,9 +9,11 @@ urlpatterns = [
     path('api/register/',views.RegisterAPI.as_view(),name='register_api'),
     path('api/login/',obtain_auth_token,name='obtain_auth_token'),
     path('api/welcome/',views.welcome.as_view(),name='welcome'),
-    path('user/',views.user,name='users'),
+    path('user/',views.user,name='user'),
     path('register/',views.branding_register.as_view(),name='branding_register'),
-    path('product/',views.product_Api.as_view(),name='product_Api')
+    path('product/',views.product_Api.as_view(),name='product_Api'),
+    path('logout/',views.Logout.as_view(),name='logout')
+    
     
 ]
 

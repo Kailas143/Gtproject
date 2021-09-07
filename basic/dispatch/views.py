@@ -44,6 +44,11 @@ class Dispatch_MaterialsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mi
 class Dispatch_details_post_API(generics.GenericAPIView, APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = Dispatch_details_serializers
+    queryset = Dispatch_details.objects.all()
+
+    def get(self,request):
+        company=requests.get('http://127.0.0.1:8000/company/details/').json()
+        return Response(company)
 
     def post(self, request):
         serializer = Dispatch_details_serializers(
@@ -52,13 +57,13 @@ class Dispatch_details_post_API(generics.GenericAPIView, APIView):
         if serializer.is_valid():
             company_idr = request.data['company_id']
             dispatch_number_r = request.data['dispatch_number']
-            dispatch = Dispatch_details.objects.filter(
-                company_id=company_idr, dispatch_number=dispatch_number_r).exists()
-            if dispatch:
-                data['error'] = 'Company with this dispatch number already exist !!! Try with another dispatch number'
-            else:
-                serializer.save()
-                data['success'] = "Dispatch succesfully saved"
+            # dispatch = Dispatch_details.objects.filter(
+            #     company_id=company_idr, dispatch_number=dispatch_number_r).exists()
+            # if dispatch:
+            #     data['error'] = 'Company with this dispatch number already exist !!! Try with another dispatch number'
+            # else:
+            serializer.save()
+            data['success'] = "Dispatch succesfully saved"
             return Response(data)
 
 

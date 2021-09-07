@@ -1,6 +1,12 @@
 from django.db import models
-
+from django.contrib.auth.models import AbstractUser
 # Create your models here.
+
+ROLE_CHOICES=(
+    ('Inward','Inward'),
+    ('Dispatch','Dispatch'),
+    ('Outward','Outward')
+)
 TOOLS_REQUIRED=(
     ('t','Tools'),
     ('i','Instrunmental')
@@ -75,7 +81,7 @@ class company_details(models.Model):
         return str(self.company_name) + '  -  ' + str(self.purchase_company) + '  -  ' + str(self.gst_no) + '  -  ' + str(self.id)
 
 class supliers_contact_details(models.Model):
-    company_details = models.ForeignKey(company_details, null=True, db_column='company_name', blank=True, on_delete=models.CASCADE)
+    company_details = models.ForeignKey(company_details,on_delete=models.CASCADE)
     email = models.CharField(null=True, max_length=1024)
     phone_no = models.CharField(null=True, max_length=1024)
     name = models.CharField(null=True, max_length=1024)
@@ -84,8 +90,19 @@ class supliers_contact_details(models.Model):
     def __str__(self):
         return str(self.company_details) + '  -  ' + str(self.name) + '  -  ' + str(self.phone_no)+ '  -  ' + str(self.post)
 
+class Roles(models.Model):
+    roles=models.CharField(max_length=1024)
+
+    def __str__(self):
+        return self.roles
+    
 
 
+class User(AbstractUser):
+    roles = models.ForeignKey(Roles,related_name='user_roles',on_delete=models.CASCADE,null=False)
+
+    def __str__(self):
+        return ' %s %s %s ' % (self.username, self.email,self.roles)
 
 
 

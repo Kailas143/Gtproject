@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'superadmin.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'superadmin',
+        'NAME': 'superadmin_db',
         'HOST' : 'localhost',
         'USER' : 'root',
         'PASSWORD' : 'root',
@@ -132,6 +132,7 @@ STATIC_URL = '/static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
+DEFAULT_FROM_EMAIL = 'kailasvs94@gmail.com'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True

@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'master',
-    'rest_framework'
+    'rest_framework',
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
@@ -78,10 +79,10 @@ WSGI_APPLICATION = 'admin.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'admin_db',
+        'NAME': 'admin_r',
         'HOST' : 'localhost',
         'USER' : 'root',
-        'PASSWORD' : 'root',
+        'PASSWORD' :'root',
         'PORT' :'',
        'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
@@ -132,3 +133,16 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'master.User'
+
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+    'rest_framework.permissions.IsAuthenticated',
+    'rest_framework.permissions.IsAdminUser'
+    ],
+   
+    }
+    

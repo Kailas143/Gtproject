@@ -1,18 +1,25 @@
 from django.shortcuts import render
 from rest_framework import generics, mixins
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication,TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from .models import (Process, Processcost, Product, Productrequirements,
-                     Productspec, Rawcomponent,company_details,supliers_contact_details)
-from .serializers import (ProcesscostSerializer, ProcesscostUpdateSerializer,
+                     Productspec, Rawcomponent, company_details,
+                     supliers_contact_details,User,Roles)
+from .serializers import (Company_detailsSerializer,
+                          Company_detailsUpdateSerializer,
+                          ProcesscostSerializer, ProcesscostUpdateSerializer,
                           ProcessSerializer, ProcessUpdateSerializer,
                           ProductrequirementsSerializer, ProductSerializer,
                           ProductspecSerializer, ProductspecUpdateSerializer,
                           ProductUpdaterequirementsSerializer,
                           ProductUpdateSerializer, RawcomponentSerializer,
-                          RawcomponentUpdateSerializer,Company_detailsSerializer,
-                          Supliers_contactSerializer,Company_detailsUpdateSerializer, Supliers_contactUpdateSerializer)
+                          RawcomponentUpdateSerializer,
+                          Supliers_contactSerializer,
+                          Supliers_contactUpdateSerializer,UserSerializer,RolesSerializer)
 
 # Create your views here.
 
@@ -100,8 +107,10 @@ class RawAPIUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
 
 class ProductAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin):
     serializer_class = ProductSerializer
+    queryset =Product.objects.all()
 
-    
+    def get(self,request):
+        return self.list(request)
     def post(self,request):
         return self.create(request)
 
@@ -189,3 +198,77 @@ class Supliers_contactUpdateApi(generics.GenericAPIView, mixins.CreateModelMixin
     
     def delete(self,request,id):
         return self.destroy(request,id)
+
+class User_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin):
+    serializer_class = UserSerializer
+    queryset=User.objects.all()
+    lookup_field ='id'
+
+
+    def get(self,request,id):
+            return self.list(request)
+
+    
+    
+    def put(self,request,id=None) :
+        return self.update(request,id)
+    
+    def delete(self,request,id):
+        return self.destroy(request,id)
+
+
+class Role_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin):
+    serializer_class = RolesSerializer
+    queryset= Roles.objects.all()
+    lookup_field ='id'
+
+    def get(self,request,id):
+        
+        return self.retrieve(request,id)
+        
+    
+    
+    
+    def put(self,request,id=None) :
+        return self.update(request,id)
+
+
+
+# class User_API(generics.GenericAPIView,mixins.CreateModelMixin) :
+#     serializer_class = UserSerializer
+#     queryset=User.objects.all()
+
+#     def post(self,request):
+#         user=  self.create(request)
+#         token,create= Token.objects.get_or_create(user=user)
+#         return token
+
+class Register_User_API(generics.GenericAPIView,APIView) :
+    serializer_class = UserSerializer
+    queryset=User.objects.all()
+
+    def post(self,request,validated_data):
+        serializer = UserSerializer(data=request.data)
+        data={}
+        if serializer.is_valid():
+            account =serializer.save()
+            data['response'] = 'Employee is Registerd Succesfully'
+            data['username'] = account.username
+            data['email']    = account.email
+            data['roles']    = account.roles
+            token,create= Token.objects.get_or_create(user=account)
+            data['token'] = token.key
+        else :
+            data = serializer.errors
+        return Response(data)
+
+
+class welcome(APIView):
+    premmission_classes =[IsAuthenticated]
+
+    def get(self,request):
+        context = {
+            'user' : str(request.user),
+            'id'   : str(request.user.id)
+        }
+        return Response(context)

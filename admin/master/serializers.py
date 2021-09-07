@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from .models import (Process, Processcost, Product, Productrequirements,
-                     Productspec, Rawcomponent,company_details,supliers_contact_details)
+                     Productspec, Rawcomponent, company_details,
+                     supliers_contact_details,User,Roles)
 
 
 class RawcomponentSerializer(serializers.ModelSerializer):
@@ -194,3 +195,20 @@ class  Supliers_contactUpdateSerializer(serializers.ModelSerializer):
     class Meta : 
         model = supliers_contact_details
         fields = '__all__'
+
+
+class RolesSerializer(serializers.ModelSerializer) :
+    class Meta :
+        model = Roles
+        fields='__all__'
+       
+
+class UserSerializer(serializers.ModelSerializer) :
+    
+    
+    class Meta :
+        model = User
+        fields = ['username','email','password','roles']
+        
+    
+

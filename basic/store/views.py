@@ -33,19 +33,27 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
     serializer_class = StockSerializer
     queryset = Stock.objects.all()
 
+    def get(self,request) :
+        company=requests.get('http://127.0.0.1:8000/company/details/').json()
+        return Response(company)
+
     def post(self, request, format=None):
 
         serializer = StockSerializer(data=request.data)
         data = {}
+        # serialization validation
         if serializer.is_valid():
 
             quantity_r = float(request.data['quantity'])
 
             product_details_r = request.data['product_details']
+            # filtering stock based on productdetails given by the user,first is given because filter is giving filtered list,here we need only single or first project 
             stock_data = Stock.objects.filter(
                 product_details=product_details_r).first()
 
             print(product_details_r)
+
+            # if stock data is found(filtered data) 
 
             if stock_data:
 
@@ -54,16 +62,19 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
                 product = Stock.objects.filter(
                     product_details=product_details_r)
                 
+                # here new stock history record is occuring for every new updation of stock
 
                 stock_history = Stock_History(stock_id=product[0], instock_qty=float(
                     product[0].quantity), after_process=float(
                     product[0].quantity)+float(quantity_r), change_in_qty=quantity_r, process="inward")
                 stock_history.save()
+                # after stock history is created stock will be updated
                 product.update(quantity=product_qty)
 
                 data['updated'] = "Stock succesfully updated"
 
             else:
+                # if stock is not found with given details new stock will be created
 
                 product = Stock(
                     product_details=product_details_r, quantity=quantity_r)
@@ -73,14 +84,16 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
                 data['created'] = "Stock Succesfully created"
                 print(quantity_r)
 
+                # new stock history will be created
+
                 stock_history = Stock_History(stock_id=product, instock_qty=float(
                     quantity_r), after_process="0.0", change_in_qty="0.0", process="inward")
                 stock_history.save()
 
             return Response(data)
-
-        # else:
-        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# if serialization validation errors occurs
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 

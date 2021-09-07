@@ -9,7 +9,7 @@ class FinancialQuerySet(models.QuerySet):
 
 class Dc_details(models.Model):
     company_id = models.SmallIntegerField()
-    dc_number=models.PositiveIntegerField()
+    dc_number= models.PositiveIntegerField()
     dc_date=models.DateField(auto_now=False, auto_now_add=False)
     inward_date=models.DateTimeField(auto_now=True)
     inward_worker=models.CharField(max_length=1024)
@@ -30,5 +30,11 @@ class Dc_materials(models.Model):
     financial_period=models.DateField(auto_now=True)
     objects=models.Manager()
     period=FinancialQuerySet.as_manager()
+
+
+    
+
+
+
 
     
