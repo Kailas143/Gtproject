@@ -2,16 +2,17 @@ from rest_framework import serializers
 
 from .models import (Process, Processcost, Product, Productrequirements,
                      Productspec, Rawcomponent, company_details,
-                     supliers_contact_details,User,Roles)
+                     supliers_contact_details,Roles)
 
 
 class RawcomponentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rawcomponent
-        fields = ('rname', 'code', 'grade', 'main_component', 'material')
+        fields = ('tenant_id','rname', 'code', 'grade', 'main_component', 'material')
 
     def save(self):
         raw = Rawcomponent(
+            tenant_id=self.validated_data.get('tenant_id'),
             rname=self.validated_data.get('rname'),
             code=self.validated_data.get('code'),
             grade=self.validated_data.get('grade'),
@@ -101,6 +102,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def save(self):
         prod = Product(
+            # tenant_id=self.validated_data('tenant_id'),
             pname=self.validated_data.get('pname'),
             billed_name=self.validated_data.get('billed_name'),
             cost=self.validated_data.get('cost'),
@@ -203,12 +205,12 @@ class RolesSerializer(serializers.ModelSerializer) :
         fields='__all__'
        
 
-class UserSerializer(serializers.ModelSerializer) :
+# class UserSerializer(serializers.ModelSerializer) :
     
     
-    class Meta :
-        model = User
-        fields = ['username','email','password','roles']
+#     class Meta :
+#         model = User
+#         fields = ['username','email','password','roles']
         
     
 

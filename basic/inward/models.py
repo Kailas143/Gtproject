@@ -1,13 +1,18 @@
 from django.db import models
+import datetime
 
 # Create your models here.
 
 class FinancialQuerySet(models.QuerySet):
-    def current_financialyear(self,current_finyear_start,current_finyear_end):
-        return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end)
+    def current_financialyear(self,user):
+        year = datetime.datetime.now().year
+        current_finyear_start= datetime.datetime(year, 4, 1)
+        current_finyear_end= datetime.datetime(year, 3, 31)
+        return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=user.id)
     
 
 class Dc_details(models.Model):
+    tenant_id=models.PositiveIntegerField()
     company_id = models.SmallIntegerField()
     dc_number= models.PositiveIntegerField()
     dc_date=models.DateField(auto_now=False, auto_now_add=False)
@@ -22,8 +27,9 @@ class Dc_details(models.Model):
     
 
 class Dc_materials(models.Model):
+    tenant_id=models.PositiveIntegerField()
     dc_details =models.ForeignKey(Dc_details,on_delete=models.CASCADE)
-    item = models.FloatField()
+    raw_materials = models.PositiveIntegerField()
     qty = models.FloatField() 
     bal_qty= models.FloatField()
     error_qty= models.FloatField()

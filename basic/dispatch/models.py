@@ -8,6 +8,7 @@ class FinancialQuerySet(models.QuerySet):
         return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end)
 
 class Dispatch_details(models.Model):
+    tenant_id=models.PositiveIntegerField()
     company_id = models.SmallIntegerField()
     dispatch_number = models.PositiveIntegerField()
     dispatch_date = models.DateTimeField(auto_now=True)
@@ -22,8 +23,9 @@ class Dispatch_details(models.Model):
     
 
 class Dispatch_materials(models.Model):
+    tenant_id=models.PositiveIntegerField()
     dispatch_details =models.ForeignKey(Dispatch_details,on_delete=models.CASCADE)
-    item = models.FloatField()
+    product_details=models.PositiveIntegerField()
     qty = models.FloatField() 
     bal_qty= models.FloatField()
     error_qty= models.FloatField()

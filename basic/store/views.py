@@ -28,14 +28,14 @@ class Stock_list(generics.GenericAPIView, mixins.ListModelMixin):
 
 
 class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [SessionAuthentication, BasicAuthentication]
+    # permission_classes = [IsAuthenticated]
     serializer_class = StockSerializer
     queryset = Stock.objects.all()
 
-    def get(self,request) :
-        company=requests.get('http://127.0.0.1:8000/company/details/').json()
-        return Response(company)
+    # def get(self,request) :
+    #     company=requests.get('http://127.0.0.1:8000/company/details/').json()
+    #     return Response(company)
 
     def post(self, request, format=None):
 
@@ -45,13 +45,16 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
         if serializer.is_valid():
 
             quantity_r = float(request.data['quantity'])
-
-            product_details_r = request.data['product_details']
+            tenant_id_r=request.data['tenant_id']
+            raw_materials_r = request.data['raw_materials']
+            min_stock_r = float(request.data['min_stock'])
+            max_stock_r = float(request.data['max_stock'])
+            avg_stock_r = float(request.data['avg_stock'])
             # filtering stock based on productdetails given by the user,first is given because filter is giving filtered list,here we need only single or first project 
             stock_data = Stock.objects.filter(
-                product_details=product_details_r).first()
+                raw_materials=raw_materials_r).first()
 
-            print(product_details_r)
+            print(raw_materials_r)
 
             # if stock data is found(filtered data) 
 
@@ -59,17 +62,17 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
 
                 product_qty = stock_data.quantity + float(quantity_r)
 
-                product = Stock.objects.filter(
-                    product_details=product_details_r)
+                product = Stock.objects.filter(tenant_id=tenant_id_r,
+                    raw_materials=raw_materials_r)
                 
                 # here new stock history record is occuring for every new updation of stock
 
-                stock_history = Stock_History(stock_id=product[0], instock_qty=float(
+                stock_history = Stock_History(tenant_id=tenant_id_r,stock_id=product[0], instock_qty=float(
                     product[0].quantity), after_process=float(
                     product[0].quantity)+float(quantity_r), change_in_qty=quantity_r, process="inward")
                 stock_history.save()
                 # after stock history is created stock will be updated
-                product.update(quantity=product_qty)
+                product.update(quantity=product_qty,min_stock=min_stock_r,max_stock=max_stock_r,avg_stock=avg_stock_r)
 
                 data['updated'] = "Stock succesfully updated"
 
@@ -77,7 +80,8 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
                 # if stock is not found with given details new stock will be created
 
                 product = Stock(
-                    product_details=product_details_r, quantity=quantity_r)
+                    tenant_id=tenant_id_r,raw_materials=raw_materials_r, quantity=quantity_r,min_stock=min_stock_r,
+                    max_stock=max_stock_r,avg_stock=avg_stock_r)
 
                 product.save()
 
@@ -86,8 +90,8 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
 
                 # new stock history will be created
 
-                stock_history = Stock_History(stock_id=product, instock_qty=float(
-                    quantity_r), after_process="0.0", change_in_qty="0.0", process="inward")
+                stock_history = Stock_History(stock_id=product,tenant_id='1',instock_qty=float(
+                    quantity_r), after_process="0.0",change_in_qty="0.0", process="inward")
                 stock_history.save()
 
             return Response(data)
@@ -99,7 +103,8 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
 
 class Stock_HistoryAPI(generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     serializer_class = Stock_History_Serializer
-    queryset = Stock_History.period.current_financialyear(current_year='2021-09-02',last_year='2021-09-03')
+    queryset=Stock_History.objects.all()
+    # queryset = Stock_History.period.current_financialyear(current_year='2021-09-02',last_year='2021-09-03')
      
 
     def get(self, request):
@@ -107,18 +112,19 @@ class Stock_HistoryAPI(generics.GenericAPIView, mixins.ListModelMixin, mixins.Re
 
 class Stock_Year_Report(generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     serializer_class = StockSerializer
-    queryset = Stock.period.current_financialyear(current_year='2021-09-02',last_year='2021-09-03')
+    queryset=Stock.objects.all()
+    # queryset = Stock.period.current_financialyear(current_year='2021-09-02',last_year='2021-09-03')
      
 
     def get(self, request):
             return self.list(request)
 
 
-class LoginAPI(APIView):
-    def post(self, request):
-        return requests.get('http://127.0.0.1:8000/apigateway/api/login/').json()
+# class LoginAPI(APIView):
+#     def post(self, request):
+#         return requests.get('http://127.0.0.1:8000/apigateway/api/login/').json()
 
 
-class RegisterAPI(APIView):
-    def post(self, request):
-        return requests.get('http://127.0.0.1:8000/apigateway/register/').json()
+# class RegisterAPI(APIView):
+#     def post(self, request):
+#         return requests.get('http://127.0.0.1:8000/apigateway/register/').json()

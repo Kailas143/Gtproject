@@ -2,16 +2,16 @@ import json
 
 import requests
 from django.shortcuts import render
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, permissions
 from rest_framework.authentication import (BasicAuthentication,
                                            SessionAuthentication,
                                            TokenAuthentication)
+from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import permissions
+
 from .models import Dc_details, Dc_materials
-from rest_framework.parsers import JSONParser
 # Create your views here.
 from .serializers import Dc_details_serializers, Dc_materials_serializers
 
@@ -100,7 +100,7 @@ class LoginAPI(APIView):
 
 class DC_details_year(generics.GenericAPIView,mixins.ListModelMixin):
     serializer_class = Dc_details_serializers
-    queryset =Dc_details.period.current_financialyear(current_finyear_start='2021-09-02',current_finyear_end='2021-09-03')
+    queryset =Dc_details.period.current_financialyear(user=request)
 
     def get(self,request):
             return self.list(request)

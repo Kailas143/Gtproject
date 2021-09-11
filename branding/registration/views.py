@@ -7,23 +7,6 @@ from rest_framework import mixins
 # Create your views here.
 
 
-# def register(request):
-#     context = {}
-#     if request.method == "POST":
-#         fullname_r = request.POST['name']
-#         username_r = request.POST['username']
-#         email_r = request.POST['email']
-#         company_r = request.POST['companyname']
-#         url = request.POST['url']
-#         register = Register.objects.create(fullname=fullname_r, username=username_r,
-#                                            email=email_r, company=company_r, url=url)
-#         if register:
-#             register.save()
-#             return render(request, 'welcome.html')
-#         else:
-#             context['error'] = 'Invalid Details'
-#             return redirect('registration:register')
-#     return render(request, 'registration.html')
 
 
 class RegisterApi(generics.GenericAPIView, mixins.ListModelMixin,mixins.CreateModelMixin):
@@ -33,5 +16,19 @@ class RegisterApi(generics.GenericAPIView, mixins.ListModelMixin,mixins.CreateMo
     def get(self, request):
         return self.list(request)
     
-    # def post(self,request):
-    #     return self.create(request)
+    def post(self,request):
+        return self.create(request)
+
+
+class Register_Update(generics.GenericAPIView,mixins.UpdateModelMixin,mixins.DestroyModelMixin,mixins.RetrieveModelMixin) :
+    serializer_class=RegisterSerializer
+    queryset=Register.objects.all()
+    lookup_field='id'
+    def get(self,request,id):
+      
+        return self.retrieve(request,id)
+       
+    def put(self,request,id):
+        return self.update(request,id)
+    def delete(self,request,id):
+        return self.destroy(request,id)

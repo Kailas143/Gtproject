@@ -1,14 +1,14 @@
 from django.shortcuts import render
 from rest_framework import generics, mixins
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication,TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
+# from rest_framework.authtoken.models import Token
+# from rest_framework.authentication import SessionAuthentication, BasicAuthentication,TokenAuthentication
 
+from rest_framework.views import APIView
+from .dynamic import dynamic_link
 from .models import (Process, Processcost, Product, Productrequirements,
                      Productspec, Rawcomponent, company_details,
-                     supliers_contact_details,User,Roles)
+                     supliers_contact_details,Roles)
 from .serializers import (Company_detailsSerializer,
                           Company_detailsUpdateSerializer,
                           ProcesscostSerializer, ProcesscostUpdateSerializer,
@@ -19,13 +19,17 @@ from .serializers import (Company_detailsSerializer,
                           ProductUpdateSerializer, RawcomponentSerializer,
                           RawcomponentUpdateSerializer,
                           Supliers_contactSerializer,
-                          Supliers_contactUpdateSerializer,UserSerializer,RolesSerializer)
+                          Supliers_contactUpdateSerializer,RolesSerializer)
 
 # Create your views here.
 
 
-class ProcessCostAPI(generics.GenericAPIView, mixins.CreateModelMixin):
+class ProcessCostAPI(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin):
     serializer_class = ProcesscostSerializer
+    queryset=Processcost.objects.all()
+
+    def get(self,request) :
+        return self.list(request)
     
     def post(self,request):
         return self.create(request)
@@ -84,8 +88,13 @@ class ProductspecUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
                 def delete(self,request,id):
                     return self.destroy(request,id)
 
-class RawAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,mixins.RetrieveModelMixin):
+class RawAPI(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,mixins.RetrieveModelMixin):
     serializer_class = RawcomponentSerializer
+    queryset =Rawcomponent.objects.all()
+    
+    def get(self,request):
+        return self.list(request)
+
     
     def post(self,request):
         return self.create(request)
@@ -199,22 +208,22 @@ class Supliers_contactUpdateApi(generics.GenericAPIView, mixins.CreateModelMixin
     def delete(self,request,id):
         return self.destroy(request,id)
 
-class User_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin):
-    serializer_class = UserSerializer
-    queryset=User.objects.all()
-    lookup_field ='id'
+# class User_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin):
+#     serializer_class = UserSerializer
+#     queryset=User.objects.all()
+#     lookup_field ='id'
 
 
-    def get(self,request,id):
-            return self.list(request)
+#     def get(self,request,id):
+#             return self.list(request)
 
     
     
-    def put(self,request,id=None) :
-        return self.update(request,id)
+    # def put(self,request,id=None) :
+    #     return self.update(request,id)
     
-    def delete(self,request,id):
-        return self.destroy(request,id)
+    # def delete(self,request,id):
+    #     return self.destroy(request,id)
 
 
 class Role_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin):
@@ -243,32 +252,32 @@ class Role_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelM
 #         token,create= Token.objects.get_or_create(user=user)
 #         return token
 
-class Register_User_API(generics.GenericAPIView,APIView) :
-    serializer_class = UserSerializer
-    queryset=User.objects.all()
+# class Register_User_API(generics.GenericAPIView,APIView) :
+#     serializer_class = UserSerializer
+#     queryset=User.objects.all()
 
-    def post(self,request,validated_data):
-        serializer = UserSerializer(data=request.data)
-        data={}
-        if serializer.is_valid():
-            account =serializer.save()
-            data['response'] = 'Employee is Registerd Succesfully'
-            data['username'] = account.username
-            data['email']    = account.email
-            data['roles']    = account.roles
-            token,create= Token.objects.get_or_create(user=account)
-            data['token'] = token.key
-        else :
-            data = serializer.errors
-        return Response(data)
+#     def post(self,request,validated_data):
+#         serializer = UserSerializer(data=request.data)
+#         data={}
+#         if serializer.is_valid():
+#             account =serializer.save()
+#             data['response'] = 'Employee is Registerd Succesfully'
+#             data['username'] = account.username
+#             data['email']    = account.email
+#             data['roles']    = account.roles
+#             token,create= Token.objects.get_or_create(user=account)
+#             data['token'] = token.key
+#         else :
+#             data = serializer.errors
+#         return Response(data)
 
 
-class welcome(APIView):
-    premmission_classes =[IsAuthenticated]
+# class welcome(APIView):
+#     premmission_classes =[IsAuthenticated]
 
-    def get(self,request):
-        context = {
-            'user' : str(request.user),
-            'id'   : str(request.user.id)
-        }
-        return Response(context)
+#     def get(self,request):
+#         context = {
+#             'user' : str(request.user),
+#             'id'   : str(request.user.id)
+#         }
+#         return Response(context)

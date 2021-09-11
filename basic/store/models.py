@@ -5,13 +5,19 @@ from django.db import models
 class FinancialQuerySet(models.QuerySet):
   
     def current_financialyear(self,current_year,last_year):
+        # id=self.request.user.tenant_company.id
+        # print(id)
         return self.filter(financial_period__gte=current_year,financial_period__lte=last_year)
 
 
 class Stock(models.Model):
-    product_details =models.PositiveIntegerField()
+    tenant_id=models.PositiveIntegerField()
+    raw_materials =models.PositiveIntegerField()
     quantity =models.FloatField()
     financial_period=models.DateField(auto_now=True)
+    min_stock=models.FloatField()
+    max_stock=models.FloatField()
+    avg_stock=models.FloatField()
     objects=models.Manager()
     period=FinancialQuerySet.as_manager()
    
@@ -19,6 +25,7 @@ class Stock(models.Model):
         return str(self.product_details)
 
 class Stock_History(models.Model) :
+    tenant_id=models.PositiveIntegerField()
     stock_id = models.ForeignKey(Stock,on_delete=models.CASCADE)
     instock_qty = models.FloatField()
     after_process = models.FloatField(null=True,blank=True)
