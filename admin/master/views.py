@@ -3,7 +3,9 @@ from rest_framework import generics, mixins
 from rest_framework.response import Response
 # from rest_framework.authtoken.models import Token
 # from rest_framework.authentication import SessionAuthentication, BasicAuthentication,TokenAuthentication
-
+from rest_framework import viewsets
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 from .dynamic import dynamic_link
 from .models import (Process, Processcost, Product, Productrequirements,
@@ -140,7 +142,8 @@ class ProductreqAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.List
     serializer_class = ProductrequirementsSerializer
     queryset = Productrequirements.objects.all()
 
-   
+    def get(self,request) :
+        return self.list(request)
     def post(self,request):
         return self.create(request)
 
@@ -281,3 +284,24 @@ class Role_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelM
 #             'id'   : str(request.user.id)
 #         }
 #         return Response(context)
+
+# class PurchaseList(generics.ListAPIView):
+#     serializer_class = ProductrequirementsSerializer
+
+#     def get_queryset(self):
+#         user = self.request.user
+class ProdReq(APIView):
+    def prod_req(self, product__id):
+        return Productrequirements.objects.filter(product=product__id)
+    # queryset = Productrequirements.objects.filter(product__id)
+    # serializer_class = ProductrequirementsSerializer
+    # lookup_fields = ('product__id',)
+   
+
+  
+    def get(self, request, product__id):
+        prod_id=self.prod_req(product__id)
+        
+        serializer = ProductrequirementsSerializer(prod_id, many=True)
+        return Response(serializer.data)
+

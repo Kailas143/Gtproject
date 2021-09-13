@@ -10,6 +10,7 @@ urlpatterns = [
     path('raw/<int:id>/',views.RawAPIUpdate.as_view(),name='RawAPIUpdate'),
 
     path('process/cost/',views.ProcessCostAPI.as_view(),name='ProcessCostAPI'),
+   
     path('process/cost/<int:id>/',views.ProcessCostUpdate.as_view(),name='ProcessCostUpdate'),
 
     path('process/',views.ProcessAPI.as_view(),name='ProcessAPI'),
@@ -22,6 +23,7 @@ urlpatterns = [
     path('product/<int:id>/',views.ProductAPIUpdate.as_view(),name='ProductUpdate'),
 
     path('product/req/',views.ProductreqAPI.as_view(),name='ProductreqAPI'),
+    path('product/requ/<int:product__id>/',views.ProdReq.as_view(),name='ProdReq'),
     path('product/req/<int:id>/',views.ProductreqUpdate.as_view(),name='ProductreqUpdate'),
    
     path('company/details/',views.Company_detailsApi.as_view(),name='Company_detailsApi'),

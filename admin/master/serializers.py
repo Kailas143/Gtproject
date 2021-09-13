@@ -8,11 +8,12 @@ from .models import (Process, Processcost, Product, Productrequirements,
 class RawcomponentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rawcomponent
-        fields = ('tenant_id','rname', 'code', 'grade', 'main_component', 'material')
+        fields = ('tenant_id','rname', 'code', 'grade', 'main_component', 'material','worker_name')
 
     def save(self):
         raw = Rawcomponent(
             tenant_id=self.validated_data.get('tenant_id'),
+            worker_name=self.validated_data.get('worker_name'),
             rname=self.validated_data.get('rname'),
             code=self.validated_data.get('code'),
             grade=self.validated_data.get('grade'),
@@ -26,7 +27,7 @@ class RawcomponentSerializer(serializers.ModelSerializer):
 class RawcomponentUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rawcomponent
-        fields = ('rname', 'code', 'grade', 'main_component', 'material')
+        fields = ('rname', 'code', 'grade', 'main_component', 'material','worker_name')
 
 
 class ProcesscostSerializer(serializers.ModelSerializer):
@@ -36,6 +37,8 @@ class ProcesscostSerializer(serializers.ModelSerializer):
 
     def save(self):
         processcost = Processcost(
+            tenant_id=self.validated_data.get('tenant_id'),
+            worker_name=self.validated_data.get('worker_name'),
             process_name=self.validated_data.get('process_name'),
             cycle_time=self.validated_data.get('cycle_time'),
             type_of_tools=self.validated_data.get('type_of_tools'),
@@ -58,6 +61,8 @@ class ProcessSerializer(serializers.ModelSerializer):
 
     def save(self):
         process = Process(
+            tenant_id=self.validated_data.get('tenant_id'),
+            worker_name=self.validated_data.get('worker_name'),
             process_name=self.validated_data.get('process_name'),
             test=self.validated_data.get('test'),
             cost=self.validated_data.get('cost'),
@@ -80,6 +85,7 @@ class ProductspecSerializer(serializers.ModelSerializer):
 
     def save(self):
         spec = Productspec(
+            worker_name=self.validated_data.get('worker_name'),
             spec=self.validated_data.get('spec'),
             value=self.validated_data.get('value'),
             unit=self.validated_data.get('unit'),
@@ -102,7 +108,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def save(self):
         prod = Product(
-            # tenant_id=self.validated_data('tenant_id'),
+            tenant_id=self.validated_data.get('tenant_id'),
+            worker_name=self.validated_data.get('worker_name'),
             pname=self.validated_data.get('pname'),
             billed_name=self.validated_data.get('billed_name'),
             cost=self.validated_data.get('cost'),
@@ -112,6 +119,7 @@ class ProductSerializer(serializers.ModelSerializer):
             code=self.validated_data.get('code'),
             job_name=self.validated_data.get('job_name'),
             main_component=self.validated_data.get('main_component'),
+           
         )
         prod.save()
         return prod
@@ -121,15 +129,21 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
-
+class ProductrequSerializer(serializers.ModelSerializer):
+     class Meta:
+        model = Productrequirements
+        fields = '__all__'
 
 class ProductrequirementsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Productrequirements
-        fields = '__all__'
+        fields = ['product','raw_component','process','quantity']
 
     def save(self):
         prodreq = Productrequirements(
+            product=self.validated_data.get('product'),
+            tenant_id=self.validated_data.get('tenant_id'),
+            worker_name=self.validated_data.get('worker_name'),
             raw_component=self.validated_data.get('raw_component'),
             process=self.validated_data.get('process'),
             quantity=self.validated_data.get('quantity'),
@@ -152,6 +166,8 @@ class Company_detailsSerializer(serializers.ModelSerializer):
     
     def save(self):
         cd = company_details(
+            tenant_id=self.validated_data.get('tenant_id'),
+            worker_name=self.validated_data.get('worker_name'),
             company_name=self.validated_data.get('company_name'),
             address_line1=self.validated_data.get('address_line1'),
             address_line2=self.validated_data.get('address_line2'),
@@ -184,6 +200,8 @@ class Supliers_contactSerializer(serializers.ModelSerializer):
     
     def save(self):
         sup = supliers_contact_details(
+            tenant_id=self.validated_data.get('tenant_id'),
+            worker_name=self.validated_data.get('worker_name'),
             company_details=self.validated_data.get('company_details'),
             email=self.validated_data.get('email'),
             phone_no=self.validated_data.get('phone_no'),

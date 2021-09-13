@@ -19,6 +19,7 @@ class FinancialQuerySet(models.QuerySet):
 
 
 
+
 class Rawcomponent(models.Model): 
     tenant_id=models.PositiveIntegerField()
     rname =models.CharField(max_length=1024)
@@ -51,6 +52,10 @@ class Product(models.Model):
     financial_period=models.DateField(auto_now=True)
     objects=models.Manager()
     period=FinancialQuerySet.as_manager()
+
+    def __str__(self):
+        return self.pname
+    
 
 class Productspec(models.Model) :
     tenant_id=models.PositiveIntegerField()
