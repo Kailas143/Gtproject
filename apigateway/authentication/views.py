@@ -198,7 +198,8 @@ class product_Api(APIView) :
     def post(self,request):
         data={}
         user_r=request.user.username
-        tenant_id=request.user.tenant_company.company_name
+        tenant_id=request.user.tenant_company.id
+        worker_name_r=request.user.username
         user=User.admin_objects.get_queryset(username=user_r)
         # print(tenant_id_r)
 
@@ -215,7 +216,8 @@ class product_Api(APIView) :
                 "CGST": request.data['CGST'],
                 "code": request.data['code'],
                 "job_name": request.data['job_name'],
-                "main_component": request.data['main_component']
+                "main_component": request.data['main_component'],
+                "worker_name" :[worker_name_r]
             }
 
             # dynamic=dynamic_link('product')
@@ -251,6 +253,7 @@ class Raw_Api(APIView) :
         data={}
         user_r=request.user.username
         tenant_id=request.user.tenant_company.id
+        worker_name_r=request.user.username
         #checking that logged user is admin or not
 
         user=User.admin_objects.get_queryset(username=user_r)
