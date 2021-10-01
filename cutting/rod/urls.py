@@ -8,5 +8,6 @@ urlpatterns = [
     path('product/list/',views.semi_products_list.as_view(),name='semi_products_list'),
     path('product/price/',views.semi_products_plist.as_view(),name='semi_products_list'),
     path('raw/',views.raw_post.as_view(),name='semi_products_list'),
-    path('raw/list/',views.raw_post_list.as_view(),name='semi_products_list')
+    path('raw/list/',views.raw_post_list.as_view(),name='semi_products_list'),
+    path('cutting/',views.cutting_API.as_view(),name='cutting_API')
 ]

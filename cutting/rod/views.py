@@ -68,16 +68,19 @@ class cutting_API(APIView) :
         if serializer.is_valid() : 
             cds=serializer.save()
             for cm in cmdata :
-                cm_data=cutting_materials(tenant_id=cm['tenant_id'],cutting_details_details=cutting_materials.objects.get(id=cds.id),semi_product_details=cm['semi_product_details'],qty=cm['qty'],bal_qty=cm['bal_qty'],error_qty=cm['error_qty'])
+              
+       
+                cm_data=cutting_materials(tenant_id=cm['tenant_id'],cutting_details_details=cutting_details.objects.get(id=cds.id),semi_product_details=semi_product_price.objects.get(id=cm['semi_product_details']),qty=cm['qty'],bal_qty=cm['bal_qty'],error_qty=cm['error_qty'])
                 cm_data.save()
-                print(cm_data.semi_product_details__id)
-                semi_pp=semi_product_price.objects.filter(id=cm_data.semi_product_details__id).exists()
+                print(cm_data.semi_product_details.id)
+                semi_pp=semi_product_price.objects.filter(id=cm_data.semi_product_details.id).first()
+                print(semi_pp)
                 if semi_pp :
-                    semi_pid=semi_pp.semi_product_details__id
+                    semi_pid=semi_pp.semi_product_details.id
                     print(semi_pid)
-                    semi_prod=semi_product.objects.filter(id=semi_pid).exists()
+                    semi_prod=semi_product.objects.filter(id=semi_pid).first()
                     if semi_prod :
-                        raw_r=semi_prod.raw_material__id
+                        raw_r=semi_prod.raw_material_id
                         quantity_r=semi_prod.quantity
                         ctstck=cutting_stock.objects.filter(raw_materials=raw_r).first()
                         if ctstck :

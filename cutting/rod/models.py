@@ -35,14 +35,14 @@ class semi_product(models.Model):
     code =models.CharField(max_length=200,unique=True)
     job_name=models.CharField(max_length=1024) 
     raw_material=models.ForeignKey(semi_raw_component,on_delete=models.CASCADE)
-    quanity=models.FloatField()
+    quantity=models.FloatField()
     worker_name=models.CharField(max_length=1024)
     financial_period=models.DateField(auto_now=True)
     objects=models.Manager()
     period=FinancialQuerySet.as_manager()
 
     def __str__(self):
-        return self.sp_name
+        return str(self.id)
 
 class semi_product_price(models.Model) :
     tenant_id=models.PositiveIntegerField()
