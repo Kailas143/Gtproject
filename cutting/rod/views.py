@@ -5,7 +5,7 @@ from . serializers import semi_product_price_serializers,semi_product_serializer
 from rest_framework.views import APIView
 from rest_framework import generics,mixins
 from rest_framework.response import Response
-# from store.models import Cutting_Stock,Cutting_Stock_History
+from store.models import cutting_stock,cutting_stock_history
 # Create your views here.
 
 #add raw materials datas
@@ -29,17 +29,16 @@ class semi_product_api(APIView) :
     def post(self,request) :
         semi_product_data=request.data[0]
         semi_price=request.data[1]
-        print(semi_price)
         serializer=semi_product_serializers(data=semi_product_data)
         if serializer.is_valid() :
             semi_product_r=serializer.save()
        
             for sp in semi_price :
-                print(sp)
                 sem_prod=semi_product_price(tenant_id=sp['tenant_id'],semi_product_details=semi_product.objects.get(id=semi_product_r.id),company=sp['company'],price=sp['price'],expiry_price=sp['expiry_price'],expiry_status=sp['expiry_status'])
                 sem_prod.save()
-                print(sem_prod)
+        
         else : 
+
             return Response('Error : Data is not valid')
         return Response('Data Added Succesfully')
 
@@ -71,14 +70,42 @@ class cutting_API(APIView) :
             for cm in cmdata :
                 cm_data=cutting_materials(tenant_id=cm['tenant_id'],cutting_details_details=cutting_materials.objects.get(id=cds.id),semi_product_details=cm['semi_product_details'],qty=cm['qty'],bal_qty=cm['bal_qty'],error_qty=cm['error_qty'])
                 cm_data.save()
-                semi_pp=semi_product_price.objects.filter(id=cm_data.id).exists()
+                print(cm_data.semi_product_details__id)
+                semi_pp=semi_product_price.objects.filter(id=cm_data.semi_product_details__id).exists()
                 if semi_pp :
                     semi_pid=semi_pp.semi_product_details__id
                     print(semi_pid)
                     semi_prod=semi_product.objects.filter(id=semi_pid).exists()
                     if semi_prod :
-                        raw=semi_prod.raw_material
+                        raw_r=semi_prod.raw_material__id
+                        quantity_r=semi_prod.quantity
+                        ctstck=cutting_stock.objects.filter(raw_materials=raw_r).first()
+                        if ctstck :
+                            qty_r=cm_data.qty*float(quantity_r)
+                            print(qty_r)
+                            stk_qty=ctstck.quantity-float(qty_r)
+                            print(stk_qty)
+                            product=cutting_stock.objects.filter(raw_materials=raw_r)
+                            stock_history = cutting_stock_history(tenant_id='1', stock_id=product[0], instock_qty=float(
+                                    product[0].quantity), after_process=float(
+                                    product[0].quantity)-float(quantity_r), change_in_qty=quantity_r, process="cutting")
+                            stock_history.save()
+                            product.update(quantity=stk_qty)
+                        else:
 
+                            product = cutting_stock_history(
+                                    tenant_id='1', raw_materials=stk_qty, quantity=quantity_r)
 
+                            product.save()
+                            print(product)
+
+                        
+                            print(quantity_r)
+
+                            stock_history =cutting_stock_history(tenant_id='1', stock_id=product, instock_qty=float(
+                                            quantity_r), after_process="0", change_in_qty="0", process="inward")
+                            stock_history.save()
         else :
             return Response("Not a valid data")
+        
+        return Response("success")
