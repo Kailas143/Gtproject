@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import (Process, Processcost, Product, Productrequirements,
-                     Productspec, Rawcomponent,Roles)
+                     Productspec, Rawcomponent, Roles)
 
 # Register your models here.
 

@@ -24,7 +24,9 @@ class RegisterSerializer(serializers.ModelSerializer):
     def save(self):
         reg=User(
                 username=self.validated_data['username'],
-                tenant_company=self.validated_data['tenant_company']
+                tenant_company=self.validated_data['tenant_company'],
+                is_admin=self.validated_data.get('is_admin'),
+                is_employee=self.validated_data.get('is_employee')
             )
         
         password=self.validated_data['password']

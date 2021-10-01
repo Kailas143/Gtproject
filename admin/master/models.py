@@ -1,5 +1,9 @@
-from django.db import models
+import datetime
+
 from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+
 # Create your models here.
 
 ROLE_CHOICES=(
@@ -12,10 +16,11 @@ TOOLS_REQUIRED=(
     ('i','Instrunmental')
 )
 class FinancialQuerySet(models.QuerySet):
-    
-    def current_financialyear(self,current_finyear_start,current_finyear_end):
-        
-        return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=id)
+    def current_financialyear(self,user):
+        year = datetime.datetime.now().year
+        current_finyear_start= datetime.datetime(year, 4, 1)
+        current_finyear_end= datetime.datetime(year, 3, 31)
+        return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=user.id)
 
 
 
@@ -35,7 +40,6 @@ class Rawcomponent(models.Model):
     def __str__(self):
         return self.code
     
-   
 
 class Product(models.Model):
     tenant_id=models.CharField(max_length=1024)
@@ -129,6 +133,20 @@ class company_details(models.Model):
    
     def __str__(self):
         return str(self.company_name) + '  -  ' + str(self.purchase_company) + '  -  ' + str(self.gst_no) + '  -  ' + str(self.id)
+
+class Product_price(models.Model) :
+    tenant_id=models.PositiveIntegerField()
+    product=models.ForeignKey(Product,on_delete=models.CASCADE)
+    company=models.ForeignKey(company_details,on_delete=models.CASCADE)
+    price=models.FloatField()
+    expiry_price=models.FloatField(null=True)
+    expiry_status=models.BooleanField(default=False)
+    financial_period=models.DateField(auto_now=True)
+
+    # def __str__(self):
+    #     return self.product__pname
+    
+
 
 class supliers_contact_details(models.Model):
     tenant_id=models.PositiveIntegerField()

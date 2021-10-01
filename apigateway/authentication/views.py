@@ -13,13 +13,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .dynamic import dynamic_link
+# from .dynamic import dynamic_link
 from .forms import UserForm
 from .models import Tenant_Company, User
 from .permissions import AdminPermission
 from .serializers import RegisterSerializer, TenantSerializer
 
-# from . dyanamic import dynamic_link
+from . dynamic import dynamic_link
 
 class Superadmin_accepted_user(APIView):
     def get(self,request):
@@ -98,11 +98,13 @@ class RegisterAPI(generics.GenericAPIView,mixins.ListModelMixin,APIView) :
 
 class welcome(APIView):
     premmission_classes =[IsAuthenticated]
-    
+
+
     def get(self,request):
         context = {
             'user' : str(request.user),
-            'id'   : str(request.user.id),
+            
+             
             'tenant_company' :str(request.user.tenant_company),
             'is_admin' : request.user.is_admin,
             'is_employee' : request.user.is_admin
@@ -145,13 +147,19 @@ class Logout(APIView):
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
 
-class branding_register(APIView,mixins.CreateModelMixin,mixins.ListModelMixin) :
+class branding_register(APIView) :
+    print('brandingregister')
     def get(self,request) :
+        print('get---------')
         dynamic=dynamic_link('branding/register')
         response=requests.get(dynamic).json()
         return Response(response)
+        pass
     def post(self,request) :
+        print('post---------')
         # the details for new registration or branding,this datas should be post in the url
+        print(request)
+        print(request.data)
         datas ={
             "first_name" : request.data['first_name'],
             "middle_name" : request.data['middle_name'],
@@ -474,12 +482,14 @@ class Productrequirements_Api(APIView) :
         user=User.admin_objects.get_queryset(username=user_r)
         if user.exists() :
             datas={
-                "tenant_id"   :[tenant_id_r],
+                "tenant_id"   : [tenant_id_r],
+                "product"     :request.data["product"],
                 "raw_component" : request.data["raw_component"],
-                "process"    : request.data["value"],
+                "process"    : request.data["process"],
                 "quantity"  : request.data["quantity"],
+                "worker_name" : [user_r],
             }
-            dynamic=dynamic_link('process/req')
+            dynamic=dynamic_link('product/req')
             response=requests.post(dynamic,data=datas).json()
             return Response(response)
        
@@ -654,3 +664,14 @@ class process_Api(APIView) :
             return Response(data)
 
 
+class Dispatch(APIView) :
+    def get(self,request):
+        response=requests.get('http://127.0.0.1:8000/dispatch/materials/').json()
+        # response=requests.get('http://127.0.0.1:8000/product/requ/'+str(id)+'/').json()
+        for r in response :
+            r_r=r['product_details']
+            print(r_r)
+            new_response=requests.get('http://127.0.0.1:8000/product/requ/'+str(id)+'/').json()
+            print(new_response)
+        
+        return Response(response)

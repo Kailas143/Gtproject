@@ -29,6 +29,7 @@ class Tenant_Company(models.Model) :
     
 
 class User(AbstractUser):
+  
     tenant_company  = models.ForeignKey(Tenant_Company,related_name='tenant_company',on_delete=models.CASCADE)
     
     is_admin = models.BooleanField(default=False)

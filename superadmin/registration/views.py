@@ -11,10 +11,12 @@ from django.core.mail import send_mail
 from . import forms
 from rest_framework import mixins,generics
 from . serializers import Accepted_Serializers
-from . models import Branding_Users
+# from . models import Branding_Users
 
 from django.conf import settings
-
+from rest_framework_simplejwt.tokens import RefreshToken
+from . import dynamic
+import smtplib
 
 # Create your views here.
 
@@ -30,12 +32,12 @@ class RegisterApi(APIView):
         #     first_name_r=r['first_name']
         #     print(first_name_r)
 
-class Accepted_user(generics.GenericAPIView,mixins.ListModelMixin):
-    serializer_class=Accepted_Serializers
-    queryset=Branding_Users.objects.all()
+# class Accepted_user(generics.GenericAPIView,mixins.ListModelMixin):
+#     serializer_class=Accepted_Serializers
+#     queryset=Branding_Users.objects.all()
 
-    def get(self,request):
-        return self.list(request)
+#     def get(self,request):
+#         return self.list(request)
 
 def accepted_user(request):
     
@@ -99,5 +101,58 @@ class Register_Update(generics.GenericAPIView,APIView):
 
 
         }
+        
         response=requests.put('http://127.0.0.1:8000/branding/user/'+str(id)+'/',data=datas).json()
+        if response['status'] == 'Accepted' :
+            content="You request is accepted succesfully"
+            mail=smtplib.SMTP('smtp.gmail.com',587)
+            mail.ehlo()
+            mail.starttls()
+            sender='kailasvs94@gmail.com'
+            recipient=str(response['email'])
+            mail.login('kailasvs94@gmail.com','82@81@066@965')
+            header='To:'+recipient+'\n'+'From:'\
+            +sender+'\n'+'subject:Accepting Confirmation mail\n'
+            content=header+content
+            mail.sendmail(sender,recipient, content)
+            mail.close()
+            print("Accepted Succesfully")
+            print(response['email'])
+
+            # subject = 'Welcome to Our Service'
+            # message = 'Your request is Accepted Succesfully'
+            # recepient = str(response['email'])
+            # send_mail(subject, 
+            #     message,EMAIL_HOST_USER,[recepient])
+            # print(send_mail)
+            print("successfully send mail")
+        elif response['status'] == 'Rejected' :
+            content="Sorry Your request can't accept by company now"
+            mail=smtplib.SMTP('smtp.gmail.com',587)
+            mail.ehlo()
+            mail.starttls()
+            sender='kailasvs94@gmail.com'
+            recipient=str(response['email'])
+            mail.login('kailasvs94@gmail.com','82@81@066@965')
+            header='To:'+recipient+'\n'+'From:'\
+            +sender+'\n'+'subject:Enquiry Mail Response\n'
+            content=header+content
+            mail.sendmail(sender,recipient, content)
+            mail.close()
+            print("Accepted Succesfully")
+            print(response['email'])
+        # elif response['status'] == 'Rejected' :
+        #     print("Sorry Rejected")
+        #     print(response['email'])
+
+        #     subject = 'Welcome to Our Service'
+        #     message = "Sorry Your request can't accept by company now"
+        #     recepient = str(response['email'])
+        #     send_mail(subject, 
+        #         message,EMAIL_HOST_USER,[recepient])
+        #     print("successfully send mail")
+        # registerd_user=json.dumps(response)
+        # type (registerd_user)
+        # print(registerd_user)
         return Response(response)
+

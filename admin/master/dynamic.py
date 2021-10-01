@@ -1,4 +1,6 @@
 from django.db import connection
+
+
 def dynamic_link(api):
         # with connection['dynamic'].cursor() as cursor:
         #     cursor=cursor.execute("SELECT * FROM domain")
@@ -12,5 +14,6 @@ def dynamic_link(api):
             scheme_url="http"
             # scheme_url = request.is_secure() and domain.url
             url = f"{scheme_url}://{domain_r}:{port}/{api}"
+            print(url)
 
             return url

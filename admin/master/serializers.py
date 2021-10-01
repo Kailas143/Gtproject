@@ -1,9 +1,27 @@
 from rest_framework import serializers
 
-from .models import (Process, Processcost, Product, Productrequirements,
-                     Productspec, Rawcomponent, company_details,
-                     supliers_contact_details,Roles)
+from .models import (Process, Processcost, Product, Product_price,
+                     Productrequirements, Productspec, Rawcomponent, Roles,
+                     company_details, supliers_contact_details)
 
+
+class Product_price_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_price
+        fields = ('id','product','company', 'price', 'expiry_price', 'expiry_status','tenant_id')
+
+    # def save(self):
+    #     raw = Rawcomponent(
+    #         tenant_id=self.validated_data.get('tenant_id'),
+    #         worker_name=self.validated_data.get('worker_name'),
+    #         rname=self.validated_data.get('rname'),
+    #         code=self.validated_data.get('code'),
+    #         grade=self.validated_data.get('grade'),
+    #         main_component=self.validated_data.get('main_component'),
+    #         material=self.validated_data.get('material')
+    #     )
+    #     raw.save()
+    #     return raw
 
 class RawcomponentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -137,7 +155,7 @@ class ProductrequSerializer(serializers.ModelSerializer):
 class ProductrequirementsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Productrequirements
-        fields = ['product','raw_component','process','quantity']
+        fields = ['tenant_id','product','raw_component','process','quantity','worker_name']
 
     def save(self):
         prodreq = Productrequirements(

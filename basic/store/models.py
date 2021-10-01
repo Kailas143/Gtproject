@@ -22,7 +22,7 @@ class Stock(models.Model):
     period=FinancialQuerySet.as_manager()
    
     def __str__(self):
-        return str(self.product_details)
+        return str(self.tenant_id)
 
 class Stock_History(models.Model) :
     tenant_id=models.PositiveIntegerField()

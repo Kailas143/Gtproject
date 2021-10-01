@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from . models import Branding_Users
+from . models import Registered_users
 
 class Accepted_Serializers(serializers.ModelSerializer) :
     class Meta :
-        model = Branding_Users
+        model = Registered_users
         fields='__all__'

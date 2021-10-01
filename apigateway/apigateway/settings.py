@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-1)du6n=8=8q_mw#5@c#9@2!syrfo!*kf$v-zc5_+^t0f0mhf@2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*','192.168.1.16']
 
 
 # Application definition
@@ -82,7 +82,7 @@ DATABASES = {
         'NAME': 'apigateway_db',
         'HOST' : 'localhost',
         'USER' : 'root',
-        'PASSWORD' : 'root',
+        'PASSWORD' : 'password',
         'PORT' :'',
        'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
@@ -93,7 +93,7 @@ DATABASES = {
         'NAME': 'dynamic_db',                                     
         'HOST' : 'localhost',
         'USER' : 'root',
-        'PASSWORD' :'root',
+        'PASSWORD' :'password',
         'PORT' :'',
        'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"

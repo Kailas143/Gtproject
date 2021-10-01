@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-h3k&2k&w0kign+mv$u+0myi7urjue4-09a#d&3xig=g!ha0#7&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*','192.168.1.16']
 
 
 # Application definition
@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'inward',
     'store',
     'rest_framework',
-    'dispatch'
+    'dispatch',
+    'outward',
+    'production'
 ]
 
 MIDDLEWARE = [
@@ -83,7 +85,19 @@ DATABASES = {
         'NAME': 'basic',
         'HOST' : 'localhost',
         'USER' : 'root',
-        'PASSWORD' : 'root',
+        'PASSWORD' : 'password',
+        'PORT' :'',
+       'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+                  }
+    },
+    
+    'dynamic': {
+        'ENGINE':'django.db.backends.mysql',
+        'NAME': 'dynamic_db',                                     
+        'HOST' : 'localhost',
+        'USER' : 'root',
+        'PASSWORD' :'password',
         'PORT' :'',
        'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"

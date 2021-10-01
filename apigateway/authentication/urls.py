@@ -12,7 +12,8 @@ urlpatterns = [
     # path('user/',views.user,name='user'),
     path('register/',views.branding_register.as_view(),name='branding_register'),
     path('tenant/',views.TenantCompany_API.as_view(),name='TenantCompany_API'),
-    
+    path('dispatch/',views.Dispatch.as_view(),name='Dispatch'),
+    path('dispatch/<int:id>/',views.Dispatch.as_view(),name='Dispatch'),
     path('product/',views.product_Api.as_view(),name='product_Api'),
     path('raw/',views.Raw_Api.as_view(),name='Raw_Api'),
     path('cost/',views.Process_Cost_Api.as_view(),name='Process_Cost_Api'),

@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -82,7 +82,18 @@ DATABASES = {
         'NAME': 'superadmin_db',
         'HOST' : 'localhost',
         'USER' : 'root',
-        'PASSWORD' : 'root',
+        'PASSWORD' : 'password',
+        'PORT' :'',
+       'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+                  }
+    },
+     'dynamic': {
+        'ENGINE':'django.db.backends.mysql',
+        'NAME': 'dynamic_db',                                     
+        'HOST' : 'localhost',
+        'USER' : 'root',
+        'PASSWORD' :'password',
         'PORT' :'',
        'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
@@ -131,11 +142,22 @@ STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
+# DJOSER = {
+#     "USER_ID_FIELD": "username",
+#     "LOGIN_FIELD": "email",
+#     "SEND_ACTIVATION_EMAIL": True,
+#     "ACTIVATION_URL": "activate/{uid}/{token}",
+#     'SERIALIZERS': {
+#         'token_create': 'apps.accounts.serializers.CustomTokenCreateSerializer',
+#     },
+# }
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+SITE_NAME = "GTSolutions"
 
 DEFAULT_FROM_EMAIL = 'kailasvs94@gmail.com'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'kailasvs94@gmail.com'
-EMAIL_HOST_PASSWORD = '82@81@066@965'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD =os.environ.get('EMAIL_HOST_PASSWORD')

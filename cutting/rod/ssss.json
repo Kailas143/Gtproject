@@ -1,0 +1,22 @@
+[
+    {   
+    "tenant_id" : 1,
+    "sp_name" : "semi1",
+    "billed_name" : "semi",
+    "cost"  : 122,
+    "IGST" : 122,
+    "SGST" : 122,
+    "CGST" : 122,
+    "code" : 122,
+    "job_name" : "Cutting",
+    "raw_material" : 1,
+    "worker_name" : "Vinu"
+},
+ [
+     {   "tenant_id" :1,
+        "company" : 1,
+        "price" :122,
+        "expiry_price":12
+     }
+ ]
+ ]

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-c2oonupx9@8x%t%=%2r+-t-o$lq%jmj^g4a_d*41dpe#(u=rar
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'registration',
     'rest_framework',
-    'microservices'
+   
 ]
 
 MIDDLEWARE = [
@@ -83,7 +83,7 @@ DATABASES = {
         'NAME': 'branding',
         'HOST' : 'localhost',
         'USER' : 'root',
-        'PASSWORD' : 'root',
+        'PASSWORD' : 'password',
         'PORT' :'',
        'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
