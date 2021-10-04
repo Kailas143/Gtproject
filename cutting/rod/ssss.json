@@ -10,13 +10,15 @@
     "code" : 122,
     "job_name" : "Cutting",
     "raw_material" : 1,
+    "quanity" : 100,
     "worker_name" : "Vinu"
 },
  [
      {   "tenant_id" :1,
         "company" : 1,
         "price" :122,
-        "expiry_price":12
+        "expiry_price":12,
+        "expiry_status" : false
      }
  ]
  ]

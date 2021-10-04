@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from . models import Registered_users
+
+from .models import Registered_users
+
 
 class Accepted_Serializers(serializers.ModelSerializer) :
     class Meta :

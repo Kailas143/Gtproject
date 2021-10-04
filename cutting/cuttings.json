@@ -1,0 +1,20 @@
+[
+    {   
+    "tenant_id" : 1,
+    "company_id" : 1,
+    "cutting_number" : 1,
+    "raw_material" : 1,
+    "quanity" : 100,
+    "cutting_worker" : "Vinu"
+},
+ [
+     { 
+        "tenant_id" :1,
+        "semi_product_details" : 1,
+        "qty" :122,
+        "bal_qty":12,
+        "error_qty" : 10
+     }
+
+ ]
+ ]

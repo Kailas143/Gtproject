@@ -151,8 +151,11 @@ class branding_register(APIView) :
     print('brandingregister')
     def get(self,request) :
         print('get---------')
-        dynamic=dynamic_link('branding/register')
+        services='branding'
+        dynamic=dynamic_link(services,'branding/register')
+        print(dynamic)
         response=requests.get(dynamic).json()
+        print(response)
         return Response(response)
         pass
     def post(self,request) :
@@ -175,7 +178,8 @@ class branding_register(APIView) :
                            
                            }
         #connecting the url from the branding project and then the datas as dictionary as passing with the url for POST method
-        dynamic=dynamic_link('branding/register')
+        services='branding'
+        dynamic=dynamic_link(services,'branding/register')
         response=requests.post(dynamic,data=datas).json()
         
         tenant_company=Tenant_Company(company_name=request.data['company_name'],address=request.data['address'],phone_number=request.data['phone_number'],city=request.data['city'],state=request.data['state'],country=request.data['company_name'])

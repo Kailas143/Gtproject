@@ -67,6 +67,7 @@ class cutting_API(APIView) :
         serializer=cutting_details_serializers(data=cddata)
         if serializer.is_valid() : 
             cds=serializer.save()
+            
             for cm in cmdata :
               
        
