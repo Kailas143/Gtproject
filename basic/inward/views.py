@@ -123,44 +123,8 @@ class Dc_detailsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.Lis
     def delete(self, request, id):
         return self.destroy(request, id)
 
-class LoginAPI(APIView):
-    def post(self, request):
-        return requests.get('http://127.0.0.1:8000/apigateway/api/login/').json()
 
 
-class DC_details_year(generics.GenericAPIView,mixins.ListModelMixin):
-    pass
-#     serializer_class = Dc_details_serializers
-#     # queryset =Dc_details.period.current_financialyear(user=request)
-
-#     def get(self,request):
-#             return self.list(request)
-
-class DC_materials_year(generics.GenericAPIView,mixins.ListModelMixin):
-    pass
-#     serializer_class = Dc_materials_serializers
-#     queryset =Dc_materials.period.current_financialyear(current_finyear_start='2021-09-02',current_finyear_end='2021-09-03')
-
-#     def get(self,request):
-            
-#             return self.list(request)
 
 
             
-class UserPermission(permissions.BasePermission,generics.GenericAPIView):
-
-    queryset=Dc_details.objects.all()
-    parser_classes = [JSONParser]
-    
-        
-    def get(self,request) :
-            user=requests.get('http://127.0.0.1:8000/user/').json()
-            user_list=[]
-            for u in user :
-                user_list.append(u)
-                print(u)
-          
-            user_n=json.dumps(user)
-            print(type(user_n))
-
-            return Response(user)

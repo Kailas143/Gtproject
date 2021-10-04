@@ -16,6 +16,8 @@ from .models import Dispatch_details, Dispatch_materials
 from .serializers import (Dispatch_details_serializers,
                           Dispatch_materials_serializers)
 
+from dynamic import dynamic_link
+
 # from rest_framework.authentication import (BasicAuthentication,
 #                                            SessionAuthentication,
 
@@ -52,7 +54,9 @@ class Dispatch_details_post_API(generics.GenericAPIView, APIView):
     queryset = Dispatch_details.objects.all()
 
     def get(self, request):
-        company = requests.get('http://127.0.0.1:8000/company/details/').json()
+        services='admin'
+        dynamic=dynamic_link(services,'company/details')
+        company = requests.get(dynamic).json()
         return Response(company)
 
     def post(self, request):
@@ -160,9 +164,6 @@ class Stock_HistoryAPI(generics.GenericAPIView, mixins.ListModelMixin, mixins.Re
             return self.list(request)
 
 
-class LoginAPI(APIView):
-    def post(self, request):
-        return requests.get('http://127.0.0.1:8000/apigateway/api/login/').json()
 
 # class Dispatch_details_year(generics.GenericAPIView,mixins.ListModelMixin):
 #     serializer_class=Dispatch_details_serializers
@@ -294,9 +295,11 @@ class Dispatch_post(generics.GenericAPIView, APIView):
                     print(materials.qty)
                     prod_id=materials.product_details
                     qty=materials.qty
-
-                    response = requests.get('http://127.0.0.1:8001/product/requ/'+str(prod_id)+'/').json()
-                    print('http://127.0.0.1:8001/product/requ/'+str(prod_id)+'/')
+                    services='admin'
+                    dynamic=dynamic_link(services,'/product/requ/'+str(prod_id))
+                    response=requests.get(dynamic).json()
+                    # response = requests.get('http://127.0.0.1:8001/product/requ/'+str(prod_id)+'/').json()
+                    # print('http://127.0.0.1:8001/product/requ/'+str(prod_id)+'/')
                     for r in response:
                         quantity_r = r['quantity']*qty
                         print(quantity_r)
