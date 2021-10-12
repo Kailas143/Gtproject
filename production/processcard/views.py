@@ -121,6 +121,9 @@ class process_card(APIView) :
         print(dynamic)
         print(response)
         for r in response :
+            services = 'admin'
+            dynamic=dynamic_link(services,'price/product/po'+str(ppp)+'cmp'+str(ppc))
+            response=requests.get(dynamic).json()
             ppp=r['product']
             ppc=r['company']
             master_product=requests.get('http://127.0.0.1:8001/price/product/po'+str(ppp)+'cmp'+str(ppc)+'/')

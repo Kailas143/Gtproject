@@ -14,7 +14,7 @@ urlpatterns = [
     # path('details/year/',views.Dispatch_details_year.as_view(),name='Dispatch_details_year'),
     # path('dispatch/<int:id>/',views.Dispatch.as_view(),name='Dispatch'),
     path('dispatch/',views.Dispatch_post.as_view(),name='Dispatch_post'),
-    path('login/',views.LoginAPI.as_view(),name='LoginAPI'),
+    # path('login/',views.LoginAPI.as_view(),name='LoginAPI'),
     path('api/details/',views.Dispatch_details_post_API.as_view(),name='Dispatch_details_post_API'),
     path('stock/',views.StockAPI.as_view(),name='StockAPI'),
 

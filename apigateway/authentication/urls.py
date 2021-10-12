@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
-
+from django.urls import path, include
 from . import views
 
 app_name='authentication'
@@ -23,6 +23,11 @@ urlpatterns = [
     path('process/',views.process_Api.as_view(),name='process_Api'),
     path('accepted/user/',views.Superadmin_accepted_user.as_view(),name='Superadmin _accepted_user'),
     path('logout/',views.Logout.as_view(),name='logout'),
+    path('user/tenant/<str:domain>/',views.user_tenant_id.as_view(),name='logout'),
+    path('user/<str:tid>/',views.user_tenant_filter.as_view(),name='user_tenant_filter'),
+    # path('api/token',TokenObtainPairView.as_view()),
+    # path('api/token/refresh',TokenRefreshView.as_view()),
+ 
     # path('users/',views.AdminUsers.as_view(),name='AdminUsers')
     
     

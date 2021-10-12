@@ -5,15 +5,20 @@ from django.db import models
 # Create your models here.
 
 class FinancialQuerySet(models.QuerySet):
-    def current_financialyear(self,user):
+    def current_financialyear(self,id):
         year = datetime.datetime.now().year
+        print(year)
         current_finyear_start= datetime.datetime(year, 4, 1)
-        current_finyear_end= datetime.datetime(year, 3, 31)
-        return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=user.id)
+        print(current_finyear_start)
+    
+        current_finyear_end= datetime.datetime(year+1, 3, 31)
+        print(current_finyear_end)
+        print(id,'iiiiii')
+        return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=id)
     
 
 class Dc_details(models.Model):
-    tenant_id=models.PositiveIntegerField()
+    tenant_id=models.PositiveIntegerField(null=True,blank=True)
     company_id = models.SmallIntegerField()
     dc_number= models.PositiveIntegerField()
     dc_date=models.DateField(auto_now=False, auto_now_add=False)

@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
+
 
 from superadmin.settings import EMAIL_HOST_USER
 
@@ -46,6 +46,7 @@ class Register_Update(generics.GenericAPIView,APIView):
         return Response(response)
 
     def put(self,request,id):
+        
         datas={
         "first_name": request.data['first_name'],
         "middle_name": request.data['middle_name'],
@@ -58,17 +59,14 @@ class Register_Update(generics.GenericAPIView,APIView):
         "city": request.data['city'],
         "state": request.data['state'],
         "country": request.data['country'],
+        "domain" :request.data['domain'],
         "status": request.data['status']
-            
-
-
         }
-        
+
         services='branding'
         dynamic=dynamic_link(services,'branding/user/'+str(id))
-        print(dynamic)
-        response=requests.get(dynamic).json()
         response=requests.put(dynamic,data=datas).json()
+
         if response['status'] == 'Accepted' :
             content="You request is accepted succesfully"
             mail=smtplib.SMTP('smtp.gmail.com',587)
@@ -83,9 +81,24 @@ class Register_Update(generics.GenericAPIView,APIView):
             mail.sendmail(sender,recipient, content)
             mail.close()
             print("Accepted Succesfully")
-            print(response['email'])
+         
+            
+            
+            datas={
+                "company_name": request.data['company_name'],
+                "address": request.data['address'],
+                "phone_number": request.data['phone_number'],
+                "city": request.data['city'],
+                "state": request.data['state'],
+                "country": request.data['country'],
+                "domain" :request.data['domain'],
+            }
 
+            services='apigateway'
+            dynamic=dynamic_link(services,'apigateway/tenant')
+            response=requests.post(dynamic,data=datas).json()
             print("successfully send mail")
+
         else :
             content="Sorry Your request can't accept by company now"
             mail=smtplib.SMTP('smtp.gmail.com',587)
@@ -100,7 +113,7 @@ class Register_Update(generics.GenericAPIView,APIView):
             mail.sendmail(sender,recipient, content)
             mail.close()
             print("Rejected Succesfully")
-            print(response['email'])
+
 
         return Response(response)
 

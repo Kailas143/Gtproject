@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.fields import DateField
 
+
 # Create your models here.
 class Mainprocess(models.Model) :
     process_name = models.CharField(max_length=1054)

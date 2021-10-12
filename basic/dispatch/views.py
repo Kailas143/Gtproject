@@ -12,11 +12,11 @@ from rest_framework.views import APIView
 from store.models import Stock, Stock_History
 from store.serializers import Stock_History_Serializer, StockSerializer
 
+from .dynamic import dynamic_link
 from .models import Dispatch_details, Dispatch_materials
 from .serializers import (Dispatch_details_serializers,
                           Dispatch_materials_serializers)
-
-from dynamic import dynamic_link
+from .utilities import get_tenant
 
 # from rest_framework.authentication import (BasicAuthentication,
 #                                            SessionAuthentication,

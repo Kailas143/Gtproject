@@ -1,4 +1,5 @@
 import mysql.connector
+from django.db.models import query
 
 mydb=mysql.connector.connect(
         host  = 'localhost',
@@ -8,21 +9,25 @@ mydb=mysql.connector.connect(
 )
 print(mydb)
 mycursor=mydb.cursor()
-mycursor.execute("Select * from domain")
+mycursor.execute("Select * from domain ")
 domain_details=mycursor.fetchall()
 print(domain_details)
 print(mycursor)
 
 
-def dynamic_link(api):
+def dynamic_link(service,api):
     mycursor=mydb.cursor()
-    mycursor.execute("Select * from domain")
+    query="select * from domain WHERE services = '%s'" % service 
+    print(query)
+  
+    # val=services
+    mycursor.execute(query)
     domain_details=mycursor.fetchall()
-    print(domain_details,'---------')
+#     print(domain_details,'---------')
     
             # scheme_url = request.is_secure() and domain.url
     url = f"{domain_details[0][1]}://{domain_details[0][0]}:{domain_details[0][2]}/{api}/"
-    print(url,'----')
+#     print(url,'----')
 
     return url
         

@@ -17,6 +17,7 @@ class Register(models.Model):
     phone_number=models.CharField(max_length=10)
     city=models.CharField(max_length=50)
     state =models.CharField(max_length=1024)
+    domain=models.CharField(max_length=1024)
     country=models.CharField(max_length=1024)
     status =models.CharField(choices=STATUS,max_length=50,default='Pending')
 

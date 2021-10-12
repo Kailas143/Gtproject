@@ -7,12 +7,11 @@ mydb=mysql.connector.connect(
         password ='password',
         database ='dynamic_db', 
 )
-print(mydb)
+
 mycursor=mydb.cursor()
 mycursor.execute("Select * from domain ")
 domain_details=mycursor.fetchall()
-print(domain_details)
-print(mycursor)
+
 
 
 def dynamic_link(services,api):

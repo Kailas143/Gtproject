@@ -7,14 +7,27 @@ from rest_framework import generics, mixins, permissions
 #                                            SessionAuthentication,
 #                                            TokenAuthentication)
 from rest_framework.parsers import JSONParser
-# from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from store.models import Stock,Stock_History
+
+from store.models import Stock, Stock_History
+
+from .dynamic import dynamic_link
 from .models import Dc_details, Dc_materials
 # Create your views here.
-from .serializers import Dc_details_serializers, Dc_materials_serializers
+from .serializers import (Dc_details_serializers, Dc_materials_serializers,
+                          List_dc_serializers)
+from .utilities import get_tenant
 
+
+class user_tenant(APIView) :
+    def get(self,request,domain) :
+        services='apigateway'
+        dynamic=dynamic_link(services,'apigateway/user/tenant'+ '/' + str(domain))
+        print(dynamic)
+        response=requests.get(dynamic).json()
+        return Response(response)
 
 class DC_details_add(generics.GenericAPIView,APIView,mixins.ListModelMixin):
     
@@ -34,18 +47,23 @@ class DC_details_add(generics.GenericAPIView,APIView,mixins.ListModelMixin):
             data=dcdata, context={'request': request})
         data = {}
        
+       
         if serializer.is_valid():
             company_idr = dcdata['company_id']
             dc_number_r = dcdata['dc_number']
-            
-            dc = Dc_details.objects.filter(
-                company_id=company_idr, dc_number=dc_number_r).exists()
+            #calling the get_tenant function from utilities file
+            tenant_id = get_tenant(request)
+            #filtering the dc details based on the financial year,to check wheather the dc details with same company exists or not
+            dc = Dc_details.period.current_financialyear(id=tenant_id).filter(
+                company_id=company_idr, dc_number=dc_number_r)
+            print(dc)
             if dc:
                 data['error'] = 'Company with this dc number already exist !!! Try with another dc number'
             else:
-                inward=serializer.save()
+                #here passing the tenant id value to the serializer of dc
+                inward=serializer.save(tenant_id=tenant_id)
                 for dc in dcmaterials :
-                    materials=Dc_materials(tenant_id=dc['tenant_id'],dc_details=Dc_details.objects.get(id=inward.id),raw_materials=dc['raw_materials'],qty=dc['qty'],bal_qty=dc['bal_qty'],error_qty=dc['error_qty'])
+                    materials=Dc_materials(tenant_id=tenant_id,dc_details=Dc_details.objects.get(id=inward.id),raw_materials=dc['raw_materials'],qty=dc['qty'],bal_qty=dc['bal_qty'],error_qty=dc['error_qty'])
                     materials.save()
                     print(materials.raw_materials)
                     raw_materials_r=materials.raw_materials
@@ -57,7 +75,7 @@ class DC_details_add(generics.GenericAPIView,APIView,mixins.ListModelMixin):
                         product_qty = stock_data.quantity + float(quantity_r)
                         min_stock_r = stock_data.min_stock
                         max_stock_r = stock_data.max_stock
-                        avg_stock_r = stock_data.avg_stock_r
+                        avg_stock_r = stock_data.avg_stock
 
                         product = Stock.objects.filter(tenant_id=tenant_id_r,
                             raw_materials=raw_materials_r)
@@ -73,6 +91,8 @@ class DC_details_add(generics.GenericAPIView,APIView,mixins.ListModelMixin):
 
                         
                 data['success'] = "Dc succesfully saved"
+        else :
+            print("error")
         return Response(data)
 
 
@@ -104,7 +124,7 @@ class Dc_MaterialsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.L
 
 class Dc_detailsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
 
-    serializer_class = Dc_details_serializers
+    serializer_class = List_dc_serializers
     queryset = Dc_details.objects.all()
     lookup_field = 'id'
 
@@ -124,7 +144,14 @@ class Dc_detailsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.Lis
         return self.destroy(request, id)
 
 
+# class DC_materials_year(APIView):
+#     pass
+# class Dc_details_year(generics.GenericAPIView,mixins.ListModelMixin):
+#     serializer_class=List_dc_serializers
+#     queryset=Dc_details.period.current_financialyear(id='1')
+    
+#     def get(self,request):
+#         return self.list(request)
 
 
 
-            

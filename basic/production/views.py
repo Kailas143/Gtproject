@@ -1,14 +1,16 @@
-from django.shortcuts import render
-from . serializers import Production_serializer,Mainprocess_serializers,Subprocess_serializer
-from . models import Production_card, Subprocess,Mainprocess
-from rest_framework.views import APIView
-from rest_framework import generics,mixins
-from rest_framework.response import Response
-from . dynamic import dynamic_link
 import json
+
 import requests
 from django.db.models import Sum
+from django.shortcuts import render
+from rest_framework import generics, mixins
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from .dynamic import dynamic_link
+from .models import Mainprocess, Production_card, Subprocess
+from .serializers import (Mainprocess_serializers, Production_serializer,
+                          Subprocess_serializer)
 
 # Create your views here.
 
@@ -145,7 +147,10 @@ class Subprocess_create_API(generics.GenericAPIView,mixins.CreateModelMixin):
 class process_card_details(APIView):
     def get(self,request,poid,cmpid):
         data={}
-        response=requests.get('http://127.0.0.1:8001/price/product/po'+str(poid)+'cmp'+str(cmpid)+'/').json()
+        services = 'admin'
+        dynamic=dynamic_link(services,'price/product/po'+str(poid)+'cmp'+str(cmpid))
+        response=requests.get(dynamic).json()
+        # response=requests.get('http://127.0.0.1:8001/price/product/po'+str(poid)+'cmp'+str(cmpid)+'/').json()
         process_card_mainprocess=[]
         process_card_process=[]
         accepted_qty_list=[]

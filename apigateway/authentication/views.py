@@ -1,6 +1,7 @@
 import json
 
 
+from . utilities import get_tenant
 import requests
 from django.http import HttpResponseRedirect
 
@@ -31,12 +32,15 @@ class Superadmin_accepted_user(APIView):
         return Response(response)
 
 
-class TenantCompany_API(generics.GenericAPIView, mixins.ListModelMixin):
+class TenantCompany_API(generics.GenericAPIView,APIView,mixins.CreateModelMixin,mixins.ListModelMixin):
     serializer_class = TenantSerializer
     queryset = Tenant_Company.objects.all()
 
     def get(self, request):
         return self.list(request)
+    
+    def post(self,request) :
+        return self.create(request)
 
 # Registration for the new users using AbstractUser for
 
@@ -85,6 +89,11 @@ class RegisterAPI(generics.GenericAPIView, mixins.ListModelMixin, APIView):
             data['tenant_company'] = account.tenant_company.company_name
             data['is_admin'] = account.is_admin
             token, create = Token.objects.get_or_create(user=account)
+            domain=account.tenant_company.domain
+            print(domain)
+            redirect = 'http://' + domain + '.company' + '.localhost:8000'
+            return HttpResponseRedirect(redirect)
+
 
             # data['token'] = token.key
 
@@ -97,7 +106,8 @@ class RegisterAPI(generics.GenericAPIView, mixins.ListModelMixin, APIView):
 
 
 class welcome(APIView):
-    premmission_classes = [IsAuthenticated]
+    # premmission_classes = [IsAuthenticated]
+
 
     def get(self, request):
         context = {
@@ -118,24 +128,43 @@ class Logout(APIView):
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
 
+class user_tenant_id(APIView):
+    def get(self, request,domain):
+        a=Tenant_Company.objects.filter(domain=domain)[0]
+        tenant_id=a.id
+        print(tenant_id)
+    
+        return Response(tenant_id)
+
+class user_tenant_filter(APIView):
+
+    def tenant_user(self,tid):
+       
+        tenant_id=Tenant_Company.objects.filter(domain=tid)
+        return tenant_id
+       
+    def get(self, request, tid):
+        tenant = self.tenant_user(tid)
+        serializer = TenantSerializer(tenant, many=True)
+       
+        return Response(serializer.data)
+
 
 class branding_register(APIView):
     print('brandingregister')
 
     def get(self, request):
-        print('get---------')
+        
         services = 'branding'
         dynamic = dynamic_link(services, 'branding/register')
-        print(dynamic)
+        
         response = requests.get(dynamic).json()
-        print(response)
+      
         return Response(response)
 
     def post(self, request):
-        print('post---------')
+       
         # the details for new registration or branding,this datas should be post in the url
-        print(request)
-        print(request.data)
         datas = {
             "first_name": request.data['first_name'],
             "middle_name": request.data['middle_name'],
@@ -147,20 +176,16 @@ class branding_register(APIView):
             "phone_number": request.data['phone_number'],
             "city": request.data['city'],
             "state": request.data['state'],
+            "domain" :request.data['domain'],
             "country": request.data['country']
 
         }
         # connecting the url from the branding project and then the datas as dictionary as passing with the url for POST method
+        
         services = 'branding'
         dynamic = dynamic_link(services,'branding/register')
         response = requests.post(dynamic, data=datas).json()
-
-        tenant_company = Tenant_Company(company_name=request.data['company_name'], address=request.data['address'], phone_number=request.data[
-                                        'phone_number'], city=request.data['city'], state=request.data['state'], country=request.data['company_name'])
-        tenant_company.save()
-
         return Response(response)
-
 
 class product_Api(APIView):
 
