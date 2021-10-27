@@ -1,13 +1,17 @@
 from django.db import models
-
+import datetime
 
 # Create your models here.
+
 class FinancialQuerySet(models.QuerySet):
-  
-    def current_financialyear(self,current_year,last_year):
-        # id=self.request.user.tenant_company.id
-        # print(id)
-        return self.filter(financial_period__gte=current_year,financial_period__lte=last_year)
+    def current_financialyear(self,id):
+        year = datetime.datetime.now().year
+        print(year)
+        current_finyear_start= datetime.datetime(year, 4, 1)
+        print(current_finyear_start)
+    
+        current_finyear_end= datetime.datetime(year+1, 3, 31)
+        return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=id)
 
 
 class Stock(models.Model):

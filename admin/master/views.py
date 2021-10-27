@@ -28,10 +28,12 @@ from .serializers import (Company_detailsSerializer,
                           Supliers_contactSerializer,
                           Supliers_contactUpdateSerializer)
 
+from . utilities import get_tenant
+
 # Create your views here.
 
 
-class ProcessCostAPI(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin):
+class ProcessCostAPI(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin,APIView):
     serializer_class = ProcesscostSerializer
     queryset=Processcost.objects.all()
 
@@ -39,7 +41,14 @@ class ProcessCostAPI(generics.GenericAPIView,mixins.ListModelMixin,mixins.Create
         return self.list(request)
     
     def post(self,request):
-        return self.create(request)
+        serializer =  ProcesscostSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            tenant_id=get_tenant(request)
+            serializer.save(tenant_id=tenant_id)
+            data["success"]="The record created successfully"
+        return Response(data)
+    
 
 class Product_price_API(generics.GenericAPIView,APIView,mixins.ListModelMixin,mixins.CreateModelMixin):
     serializer_class=Product_price_Serializer
@@ -51,13 +60,14 @@ class Product_price_API(generics.GenericAPIView,APIView,mixins.ListModelMixin,mi
         serializer =  Product_price_Serializer(data=request.data)
         data = {}
         if serializer.is_valid():
+            tenant_id=get_tenant(request)
             company_r=request.data['company']
             product_r=request.data['product']
             prod=Product_price.objects.filter(product=product_r,company=company_r).exists()
             if prod :
                 data["error"]="The product for this company already exist"
             else :
-                serializer.save()
+                serializer.save(tenant_id=tenant_id)
                 data["success"]="The record created successfully"
         
         return Response(data)
@@ -82,7 +92,13 @@ class ProcessAPI(generics.GenericAPIView, mixins.CreateModelMixin):
     serializer_class = ProcessSerializer
     
     def post(self,request):
-        return self.create(request)
+        serializer =   ProcessSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            tenant_id=get_tenant(request)
+            serializer.save(tenant_id=tenant_id)
+            data["success"]="The record created successfully"
+        return Response(data)
 
 
 class ProcessUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
@@ -103,7 +119,15 @@ class ProductspecAPI(generics.GenericAPIView, mixins.CreateModelMixin):
     serializer_class = ProductspecSerializer
     
     def post(self,request):
-        return self.create(request)
+        serializer = ProductspecSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            tenant_id=get_tenant(request)
+            serializer.save(tenant_id=tenant_id)
+            data["success"]="The record created successfully"
+        else : 
+            data["error"]= "Error are occured !! Try again"
+        return Response(data)
 
 class ProductspecUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
                 mixins.DestroyModelMixin,mixins.RetrieveModelMixin):
@@ -127,7 +151,15 @@ class RawAPI(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMix
 
     
     def post(self,request):
-        return self.create(request)
+        serializer = RawcomponentSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            tenant_id=get_tenant(request)
+            serializer.save(tenant_id=tenant_id)
+            data["success"]="The record created successfully"
+        else : 
+            data["error"]= "Error are occured !! Try again"
+        return Response(data)
     
    
 
@@ -151,7 +183,15 @@ class ProductAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListMod
     def get(self,request):
         return self.list(request)
     def post(self,request):
-        return self.create(request)
+        serializer =  ProductSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            tenant_id=get_tenant(request)
+            serializer.save(tenant_id=tenant_id)
+            data["success"]="The record created successfully"
+        else : 
+            data["error"]= "Error are occured !! Try again"
+        return Response(data)
 
 class ProductAPIUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
                 mixins.DestroyModelMixin,mixins.RetrieveModelMixin):
@@ -173,7 +213,15 @@ class ProductreqAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.List
     def get(self,request) :
         return self.list(request)
     def post(self,request):
-        return self.create(request)
+        serializer = ProductrequirementsSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            tenant_id=get_tenant(request)
+            serializer.save(tenant_id=tenant_id)
+            data["success"]="The record created successfully"
+        else : 
+            data["error"]= "Error are occured !! Try again"
+        return Response(data)
 
 
 class ProductreqUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
@@ -197,17 +245,16 @@ class Company_detailsApi(generics.GenericAPIView, mixins.CreateModelMixin,mixins
         return self.list(request)
 
     def post(self,request):
-        return self.create(request)
+        serializer = Company_detailsSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            tenant_id=get_tenant(request)
+            serializer.save(tenant_id=tenant_id)
+            data["success"]="The record created successfully"
+        else : 
+            data["error"]= "Error are occured !! Try again"
+        return Response(data)
 
-class Company_detailsApi(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin):
-    serializer_class = Company_detailsSerializer
-    queryset = company_details.objects.all()
-
-    def get(self,request,id=None):
-        return self.list(request)
-
-    def post(self,request):
-        return self.create(request)
 
 class Company_detailsUpdateApi(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin,mixins.UpdateModelMixin,
                 mixins.DestroyModelMixin,mixins.RetrieveModelMixin):
@@ -232,7 +279,15 @@ class Supliers_contactApi(generics.GenericAPIView, mixins.CreateModelMixin,mixin
         return self.list(request)
 
     def post(self,request):
-        return self.create(request)
+        serializer = Supliers_contactSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            tenant_id=get_tenant(request)
+            serializer.save(tenant_id=tenant_id)
+            data["success"]="The record created successfully"
+        else : 
+            data["error"]= "Error are occured !! Try again"
+        return Response(data)
 
 class Supliers_contactUpdateApi(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin,mixins.UpdateModelMixin,
                 mixins.DestroyModelMixin,mixins.RetrieveModelMixin):
@@ -248,23 +303,6 @@ class Supliers_contactUpdateApi(generics.GenericAPIView, mixins.CreateModelMixin
     
     def delete(self,request,id):
         return self.destroy(request,id)
-
-# class User_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin):
-#     serializer_class = UserSerializer
-#     queryset=User.objects.all()
-#     lookup_field ='id'
-
-
-#     def get(self,request,id):
-#             return self.list(request)
-
-    
-    
-    # def put(self,request,id=None) :
-    #     return self.update(request,id)
-    
-    # def delete(self,request,id):
-    #     return self.destroy(request,id)
 
 
 class Role_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin):
@@ -284,50 +322,7 @@ class Role_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelM
 
 
 
-# class User_API(generics.GenericAPIView,mixins.CreateModelMixin) :
-#     serializer_class = UserSerializer
-#     queryset=User.objects.all()
 
-#     def post(self,request):
-#         user=  self.create(request)
-#         token,create= Token.objects.get_or_create(user=user)
-#         return token
-
-# class Register_User_API(generics.GenericAPIView,APIView) :
-#     serializer_class = UserSerializer
-#     queryset=User.objects.all()
-
-#     def post(self,request,validated_data):
-#         serializer = UserSerializer(data=request.data)
-#         data={}
-#         if serializer.is_valid():
-#             account =serializer.save()
-#             data['response'] = 'Employee is Registerd Succesfully'
-#             data['username'] = account.username
-#             data['email']    = account.email
-#             data['roles']    = account.roles
-#             token,create= Token.objects.get_or_create(user=account)
-#             data['token'] = token.key
-#         else :
-#             data = serializer.errors
-#         return Response(data)
-
-
-# class welcome(APIView):
-#     premmission_classes =[IsAuthenticated]
-
-#     def get(self,request):
-#         context = {
-#             'user' : str(request.user),
-#             'id'   : str(request.user.id)
-#         }
-#         return Response(context)
-
-# class PurchaseList(generics.ListAPIView):
-#     serializer_class = ProductrequirementsSerializer
-
-#     def get_queryset(self):
-#         user = self.request.user
 class ProdReq(APIView):
     def prod_req(self, product__id):
         return Productrequirements.objects.filter(product=product__id)

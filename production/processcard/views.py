@@ -1,19 +1,28 @@
-from django.shortcuts import render
-from . serializers import Production_serializer,Mainprocess_serializers,Subprocess_serializer
-from . models import Production_card, Subprocess,Mainprocess
-from rest_framework.views import APIView
-from rest_framework import generics,mixins
-from rest_framework.response import Response
-from . dynamic import dynamic_link
 import json
+
 import requests
 from django.db.models import Sum
+from django.shortcuts import render
+from rest_framework import generics, mixins
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from .dynamic import dynamic_link
+from .models import Mainprocess, Production_card, Subprocess
+from .serializers import (Mainprocess_serializers, Production_serializer,
+                          Subprocess_serializer)
+
+from .utilities import get_tenant
 
 # Create your views here.
 
-class Main_process_API_View(generics.GenericAPIView,APIView) :
+class Main_process_API_View(generics.GenericAPIView,APIView,mixins.ListModelMixin) :
     serializer_class=Mainprocess_serializers
+    queryset=Mainprocess.objects.all()
+
+    def get(self,request) :
+        return self.list(request)
+
 
     def post(self,request) :
         main_process_r=request.data[0]
@@ -22,20 +31,17 @@ class Main_process_API_View(generics.GenericAPIView,APIView) :
         print(sub_process_r)
         serializer = Mainprocess_serializers(data=main_process_r)
         if serializer.is_valid():
-            main_process=serializer.save()
-            print(main_process.process_name)
-            
-            # print(outward)
-            # type(outward)
-            # print(outward.dc_number)
-            # print(sub_process_r)
-           
+            tenant_id=get_tenant(request)
+            print(tenant_id)
+            main_process=serializer.save(tenant_id=tenant_id)
             for i in  sub_process_r :
-                # print(i)
-                # print(i['product'])
-                materials=Subprocess(mainprocess=Mainprocess.objects.get(id=main_process.id),tenant_id=i['tenant_id'],process_name =i['process_name'],stage=i['stage'],worker_name=i['worker_name'])
+                materials=Subprocess(mainprocess=Mainprocess.objects.get(id=main_process.id),tenant_id=tenant_id,process_name =i['process_name'],stage=i['stage'],worker_name=i['worker_name'],product_price=i['product_price'])
                 materials.save()
             return Response("Success")
+        else : 
+            print("error")
+
+        return Response("data added")
 
 class Main_process_list(generics.GenericAPIView,mixins.ListModelMixin):
     serializer_class=Mainprocess_serializers
@@ -121,12 +127,11 @@ class process_card(APIView) :
         print(dynamic)
         print(response)
         for r in response :
-            services = 'admin'
-            dynamic=dynamic_link(services,'price/product/po'+str(ppp)+'cmp'+str(ppc))
-            response=requests.get(dynamic).json()
             ppp=r['product']
             ppc=r['company']
-            master_product=requests.get('http://127.0.0.1:8001/price/product/po'+str(ppp)+'cmp'+str(ppc)+'/')
+            services = 'admin'
+            dynamic=dynamic_link(services,'price/product/po'+str(ppp)+'cmp'+str(ppc))
+            master_product=requests.get(dynamic).json()
             print(product_price)
             print(master_product)
         return prod_price
@@ -148,7 +153,10 @@ class Subprocess_create_API(generics.GenericAPIView,mixins.CreateModelMixin):
 class process_card_details(APIView):
     def get(self,request,poid,cmpid):
         data={}
-        response=requests.get('http://127.0.0.1:8001/price/product/po'+str(poid)+'cmp'+str(cmpid)+'/').json()
+        services = 'admin'
+        dynamic=dynamic_link(services,'price/product/po'+str(poid)+'cmp'+str(cmpid))
+        response=requests.get(dynamic).json()
+        # response=requests.get('http://127.0.0.1:8001/price/product/po'+str(poid)+'cmp'+str(cmpid)+'/').json()
         process_card_mainprocess=[]
         process_card_process=[]
         accepted_qty_list=[]

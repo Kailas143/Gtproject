@@ -16,6 +16,7 @@ from .dynamic import dynamic_link
 from .models import Dispatch_details, Dispatch_materials
 from .serializers import (Dispatch_details_serializers,
                           Dispatch_materials_serializers)
+
 from .utilities import get_tenant
 
 # from rest_framework.authentication import (BasicAuthentication,
@@ -66,7 +67,9 @@ class Dispatch_details_post_API(generics.GenericAPIView, APIView):
         if serializer.is_valid():
             company_idr = request.data['company_id']
             dispatch_number_r = request.data['dispatch_number']
-            dispatch = Dispatch_details.objects.filter(
+             #calling the get_tenant function from utilities file
+            tenant_id = get_tenant(request)
+            dispatch = Dispatch_details.period.current_financialyear(id=tenant_id).filter(
                 company_id=company_idr, dispatch_number=dispatch_number_r).exists()
             if dispatch:
                 data['error'] = 'Company with this dispatch number already exist !!! Try with another dispatch number'
@@ -278,6 +281,7 @@ class Dispatch_post(generics.GenericAPIView, APIView):
         serializer = Dispatch_details_serializers(data=jsdata,context={'request': request})
         print(jsdata['dispatch_number'])
         if serializer.is_valid():
+            tenant_id=get_tenant(request)
             data={}
             print(jsdata['company_id'])
             company_id_r=jsdata['company_id']
@@ -288,9 +292,9 @@ class Dispatch_post(generics.GenericAPIView, APIView):
                 
             else :
                  
-                data_dispatch=serializer.save()
+                data_dispatch=serializer.save(tenant_id=tenant_id)
                 for i in mater_data:
-                    materials=Dispatch_materials(dispatch_details=Dispatch_details.objects.get(id=data_dispatch.id),tenant_id=i['tenant_id'],product_details=i['product_details'],qty=i['qty'],bal_qty=i['bal_qty'],error_qty=i['error_qty'])
+                    materials=Dispatch_materials(dispatch_details=Dispatch_details.objects.get(id=data_dispatch.id),tenant_id=tenant_id,product_details=i['product_details'],qty=i['qty'],bal_qty=i['bal_qty'],error_qty=i['error_qty'])
                     materials.save()
                     print(materials.qty)
                     prod_id=materials.product_details
@@ -322,7 +326,7 @@ class Dispatch_post(generics.GenericAPIView, APIView):
                             product = Stock.objects.filter(
                                         raw_materials=prod_req)
 
-                            stock_history = Stock_History(tenant_id='1', stock_id=product[0], instock_qty=float(
+                            stock_history = Stock_History(tenant_id=tenant_id, stock_id=product[0], instock_qty=float(
                                     product[0].quantity), after_process=float(
                                     product[0].quantity)-float(quantity_r), change_in_qty=quantity_r, process="dispatch")
                             stock_history.save()
@@ -333,7 +337,7 @@ class Dispatch_post(generics.GenericAPIView, APIView):
                         else:
 
                             product = Stock(
-                                    tenant_id='1', raw_materials=prod_req, quantity=quantity_r)
+                                    tenant_id=tenant_id, raw_materials=prod_req, quantity=quantity_r)
 
                             product.save()
                             print(product)
@@ -341,7 +345,7 @@ class Dispatch_post(generics.GenericAPIView, APIView):
                         
                             print(quantity_r)
 
-                            stock_history = Stock_History(tenant_id='1', stock_id=product, instock_qty=float(
+                            stock_history = Stock_History(tenant_id=tenant_id, stock_id=product, instock_qty=float(
                         quantity_r), after_process="0", change_in_qty="0", process="inward")
                             stock_history.save()
                 data["success"]="Record added succesfully"

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
+from django.db.models.fields.related import ForeignKey
 
 # Create your models here.
 
@@ -12,6 +13,10 @@ class AdminManager(models.Manager):
 class EmployeeManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_employee=True)  
+
+class RolesManager(models.Manager):
+    def get_queryset(self,username,roles):
+        return super().get_queryset().filter(username=username,is_employee=True,roles=roles)
 
 class Tenant_Company(models.Model) :
     company_name=models.CharField(max_length=1024)
@@ -42,6 +47,29 @@ class User(AbstractUser):
 
     def __str__(self):
       return (self.username)
+
+class emp_roles(models.Model):
+    roles=models.CharField(max_length=1024)
+
+
+
+    def __str__(self):
+        return self.roles
+    
+
+
+class Employee(models.Model):
+    employee=ForeignKey(User,on_delete=models.CASCADE)
+    roles=models.ManyToManyField(emp_roles)
+    objects=models.Manager()
+    roles_manager=RolesManager()
+
+    def __str__(self):
+        return self.employee.username
+    
+
+class Menu(models.Model):
+    pass
     
     # def tenant_company(self):
     #     return self.tenant_company.id

@@ -7,16 +7,13 @@ from rest_framework.views import APIView
 from dispatch.models import Dispatch_details, Dispatch_materials
 
 from .models import outward_details, outward_materials
-from .serializers import outward_materials_serializers, outward_serializers
+from .serializers import outward_materials_serializers, outward_serializers,outward_list_serializers
 
-
+from .utilities import get_tenant
 # Create your views here.
 class Outward_API(generics.GenericAPIView,APIView,mixins.ListModelMixin):
     serializer_class = outward_serializers
     queryset=outward_details.objects.all()
-
-    def get(self,request) :
-        return self.list(request)
     
     def post(self,request) :
         outward_details_r=request.data[0]
@@ -24,8 +21,11 @@ class Outward_API(generics.GenericAPIView,APIView,mixins.ListModelMixin):
         print(outward_details_r)
         print(outward_materials_r)
         serializer = outward_serializers(data=outward_details_r)
+
         if serializer.is_valid():
-            outward_r=serializer.save()
+            tenant_id=get_tenant(request)
+            print(tenant_id,'-)')
+            outward_r=serializer.save(tenant_id=tenant_id)
             print(outward_r.vehicle_number)
             
             # print(outward)
@@ -36,7 +36,7 @@ class Outward_API(generics.GenericAPIView,APIView,mixins.ListModelMixin):
             for i in  outward_materials_r :
                 print(i)
                 print(i['product'])
-                materials=outward_materials(outward_details=outward_details.objects.get(id=outward_r.id),tenant_id=i['tenant_id'],product =i['product'],qty=i['qty'],bal_qty=i['bal_qty'])
+                materials=outward_materials(outward_details=outward_details.objects.get(id=outward_r.id),tenant_id=tenant_id,product =i['product'],qty=i['qty'],bal_qty=i['bal_qty'])
                 materials.save()
                 dispatch=Dispatch_materials.objects.filter(product_details=materials.product,dispatch_details=outward_r.dc_number).first()
                 
@@ -59,4 +59,19 @@ class Outwardmaterial_API(generics.GenericAPIView,APIView,mixins.ListModelMixin)
     
     def get(self,request):
 
+        return self.list(request)
+
+
+# class outward_details_year(generics.GenericAPIView,mixins.ListModelMixin):
+#     serializer_class=outward_serializers
+#     queryset=outward_details.period.current_financialyear(id='1')
+    
+#     def get(self,request):
+#         return self.list(request)
+
+class outward_list(generics.GenericAPIView,mixins.ListModelMixin):
+    serializer_class=outward_list_serializers
+    queryset=outward_details.objects.all()
+
+    def get(self,request) :
         return self.list(request)

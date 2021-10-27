@@ -164,7 +164,6 @@ class supliers_contact_details(models.Model):
         return str(self.company_details) + '  -  ' + str(self.name) + '  -  ' + str(self.phone_no)+ '  -  ' + str(self.post)
 
 class Roles(models.Model):
-    tenant_id=models.PositiveIntegerField()
     roles=models.CharField(max_length=1024)
 
     def __str__(self):
@@ -172,11 +171,11 @@ class Roles(models.Model):
     
 
 
-# class User(AbstractUser):
-#     roles = models.ForeignKey(Roles,related_name='user_roles',on_delete=models.CASCADE,null=False)
+class Employee(AbstractUser):
+    roles = models.ForeignKey(Roles,related_name='user_roles',on_delete=models.CASCADE,null=False)
 
-#     def __str__(self):
-#         return ' %s %s %s ' % (self.username, self.email,self.roles)
+    def __str__(self):
+        return ' %s %s %s ' % (self.username, self.email,self.roles)
 
 
 

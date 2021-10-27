@@ -1,0 +1,17 @@
+[
+    {   
+ 
+        "dc_number": 1001,
+        "vehicle_number" : "Hj123"
+    },
+    [
+    {
+          "raw_materials": 1,
+            "qty": 12.0,
+            "product": 6,
+            "bal_qty": 121.0,
+            "error_qty": -1.0
+    
+    }
+    ]
+    ]

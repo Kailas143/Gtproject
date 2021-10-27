@@ -1,14 +1,55 @@
-from rest_framework import permissions
+
+from rest_framework.permissions import BasePermission
 
 
-class AdminPermission(permissions.BasePermission):
-    def has_permission(self,request,view):
-        if view.action=='list' :
-            return request.user.is_authenticated() and request.user.is_admin
-        elif view.action=='create' :
-            return True
-        elif view.action in ['retrieve', 'update', 'partial_update', 'destroy']:
-            return True
-        else:
-            return False
-   
+
+from .models import User,Employee,emp_roles
+
+
+def roles_users(request):
+    role_list=[]
+    emp=Employee.objects.filter(employee=request.user.id).first()
+    for i in emp.roles.all():
+        role_list.append(i.roles)
+        print(i.roles)
+        return role_list
+
+class IsInward(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_employee:
+            print(request)
+            if 'Inwade' in roles_users(request):
+                return True
+            else :
+                return False
+
+
+class IsDispatch(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_employee:
+            print(request)
+            if 'Dispatch' in roles_users(request):
+                return True
+            else :
+                return False
+
+
+class IsCutting(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_employee:
+            print(request)
+            if 'Cutting' in roles_users(request):
+                return True
+            else :
+                return False
+
+
+class IsProduction(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_employee:
+            print(request)
+            if 'Production' in roles_users(request):
+                return True
+            else :
+                return False
+       

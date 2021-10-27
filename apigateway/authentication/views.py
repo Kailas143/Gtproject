@@ -1,7 +1,7 @@
 import json
 
 
-from . utilities import get_tenant
+# from . utilities import get_tenant
 import requests
 from django.http import HttpResponseRedirect
 
@@ -18,9 +18,52 @@ from rest_framework.views import APIView
 from .dynamic import dynamic_link
 # from .dynamic import dynamic_link
 from .forms import UserForm
-from .models import Tenant_Company, User
-from .permissions import AdminPermission
-from .serializers import RegisterSerializer, TenantSerializer
+from .models import Employee, Tenant_Company, User,emp_roles
+from . permissions import IsInward
+from .serializers import RegisterSerializer, TenantSerializer,Employee_RegisterSerializer,emp_role_serializers,employee_roles, employee_roles_details
+
+
+
+class emp_roles_post(generics.GenericAPIView,APIView,mixins.CreateModelMixin,mixins.ListModelMixin):
+  
+    serializer_class= employee_roles_details
+    queryset=Employee.objects.all()
+
+    def get(self,request):
+        return self.list(request)
+    
+    def post(self,request) :
+        return self.create(request)
+
+class emp_roles_add(generics.GenericAPIView,APIView,mixins.CreateModelMixin,mixins.ListModelMixin):
+    permission_classes = [IsAuthenticated,IsInward]
+    serializer_class=employee_roles
+    queryset=Employee.objects.all()
+ 
+    def get(self,request):
+        return self.list(request)
+    
+    def post(self,request) :
+        return self.create(request)
+
+class add_employee(generics.GenericAPIView,APIView,mixins.CreateModelMixin,mixins.ListModelMixin):
+    serializer_class=Employee_RegisterSerializer
+    queryset=User.emp_objects.all()
+    def get(self,request) :
+        return self.list(request)
+    
+    def post(self,request) :
+        return self.create(request)
+
+class add_roles(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelMixin):
+    serializer_class=emp_role_serializers
+    queryset= emp_roles.objects.all()
+
+    def get(self,request):
+        return self.list(request)
+    
+    def post(self,request):
+        return self.create(request)
 
 
 class Superadmin_accepted_user(APIView):
@@ -196,7 +239,7 @@ class product_Api(APIView):
         data = {}
         user_r = request.user.username
 
-        user = User.admin_objects.get_queryset(username=user_r)
+        user = User.admin_objects.get_queryset(username=user_r) 
         print(user)
         # if request.user.is_admin :
         if user.exists():

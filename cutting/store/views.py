@@ -4,6 +4,7 @@ from . serializers import cutting_stock_serializers,cutting_stock_history_serial
 from rest_framework import mixins,generics,status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from .utilities import get_tenant
 
 
 # Create your views here.
@@ -21,9 +22,10 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
 
         # serialization validation
         if serializer.is_valid():
+            tenant_id=get_tenant(request)
 
             quantity_r = float(request.data['quantity'])
-            tenant_id_r=request.data['tenant_id']
+            tenant_id_r=tenant_id
             raw_materials_r = request.data['raw_materials']
             min_stock_r = float(request.data['min_stock'])
             max_stock_r = float(request.data['max_stock'])
@@ -68,7 +70,7 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
 
                 # new stock history will be created
 
-                stock_history = cutting_stock_history(stock_id=product,tenant_id='1',instock_qty=float(
+                stock_history = cutting_stock_history(stock_id=product,tenant_id=tenant_id_r,instock_qty=float(
                     quantity_r), after_process="0.0",change_in_qty="0.0", process="inward")
                 stock_history.save()
 

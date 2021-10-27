@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from . models import Mainprocess,Subprocess,Production
+from . models import Mainprocess,Subprocess,Production_card
 
 class Mainprocess_serializers(serializers.ModelSerializer) :
     class Meta :
         model = Mainprocess
-        fields = '__all__'
+        fields = ['process_name','stage']
 
 class Subprocess_serializer(serializers.ModelSerializer) :
     class Meta :
@@ -14,5 +14,6 @@ class Subprocess_serializer(serializers.ModelSerializer) :
 
 class Production_serializer(serializers.ModelSerializer) :
     class Meta :
-        model = Production
+        model = Production_card
         fields = '__all__'
+

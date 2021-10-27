@@ -1,0 +1,33 @@
+[
+{       
+        "store_name" : "storeA",
+        "tenant_id" :1,
+        "company_id": 1,
+        "dc_number": 101,
+        "dc_date": "2021-09-21",
+        "inward_worker" : "asha"
+},
+[
+{
+       "product": 1,
+        "qty": 12.0,
+        "bal_qty": 121.0,
+        "error_qty": -1.0
+
+}
+]
+]
+
+
+{
+        "tenant_id" : 1,
+        "pkg_number" : "pack1",
+        "no_of_prod" : 50,
+        "pkg_name" : "cosmetics",
+        "batch_number": "2021-09-10",
+        "dc_materials" : 1
+    
+    
+    
+}  
+s

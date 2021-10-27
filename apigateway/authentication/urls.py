@@ -6,6 +6,10 @@ from . import views
 app_name='authentication'
 
 urlpatterns = [
+    path('emp/role/add/',views. emp_roles_post.as_view(),name='emp_roles_post'),
+    path('emp/role/',views.emp_roles_add.as_view(),name='employee'),
+    path('employee/',views.add_employee.as_view(),name='employee_api'),
+    path('add/roles/',views.add_roles.as_view(),name='add_roles'),
     path('api/register/',views.RegisterAPI.as_view(),name='register_api'),
     path('api/login/',obtain_auth_token,name='obtain_auth_token'),
     path('api/welcome/',views.welcome.as_view(),name='welcome'),

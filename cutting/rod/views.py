@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from rest_framework import serializers
+
+from cutting.rod.utilities import get_tenant
 from . models import semi_product,semi_product_price,cutting_details,cutting_materials,semi_raw_component
 from . serializers import semi_product_price_serializers,semi_product_serializers,cutting_details_serializers,cutting_materials_serializers,raw_component_serializer
 from rest_framework.views import APIView
@@ -31,10 +33,11 @@ class semi_product_api(APIView) :
         semi_price=request.data[1]
         serializer=semi_product_serializers(data=semi_product_data)
         if serializer.is_valid() :
-            semi_product_r=serializer.save()
+            tenant_id=get_tenant(request)
+            semi_product_r=serializer.save(tenant_id=tenant_id)
        
             for sp in semi_price :
-                sem_prod=semi_product_price(tenant_id=sp['tenant_id'],semi_product_details=semi_product.objects.get(id=semi_product_r.id),company=sp['company'],price=sp['price'],expiry_price=sp['expiry_price'],expiry_status=sp['expiry_status'])
+                sem_prod=semi_product_price(tenant_id=tenant_id,semi_product_details=semi_product.objects.get(id=semi_product_r.id),company=sp['company'],price=sp['price'],expiry_price=sp['expiry_price'],expiry_status=sp['expiry_status'])
                 sem_prod.save()
         
         else : 
@@ -66,12 +69,13 @@ class cutting_API(APIView) :
         cmdata=request.data[1]
         serializer=cutting_details_serializers(data=cddata)
         if serializer.is_valid() : 
+            tenant_id=get_tenant(request)
             cds=serializer.save()
             
             for cm in cmdata :
               
        
-                cm_data=cutting_materials(tenant_id=cm['tenant_id'],cutting_details_details=cutting_details.objects.get(id=cds.id),semi_product_details=semi_product_price.objects.get(id=cm['semi_product_details']),qty=cm['qty'],bal_qty=cm['bal_qty'],error_qty=cm['error_qty'])
+                cm_data=cutting_materials(tenant_id=tenant_id,cutting_details_details=cutting_details.objects.get(id=cds.id),semi_product_details=semi_product_price.objects.get(id=cm['semi_product_details']),qty=cm['qty'],bal_qty=cm['bal_qty'],error_qty=cm['error_qty'])
                 cm_data.save()
                 print(cm_data.semi_product_details.id)
                 semi_pp=semi_product_price.objects.filter(id=cm_data.semi_product_details.id).first()
@@ -90,7 +94,7 @@ class cutting_API(APIView) :
                             stk_qty=ctstck.quantity-float(qty_r)
                             print(stk_qty)
                             product=cutting_stock.objects.filter(raw_materials=raw_r)
-                            stock_history = cutting_stock_history(tenant_id='1', stock_id=product[0], instock_qty=float(
+                            stock_history = cutting_stock_history(tenant_id=tenant_id, stock_id=product[0], instock_qty=float(
                                     product[0].quantity), after_process=float(
                                     product[0].quantity)-float(quantity_r), change_in_qty=quantity_r, process="cutting")
                             stock_history.save()
@@ -106,7 +110,7 @@ class cutting_API(APIView) :
                         
                             print(quantity_r)
 
-                            stock_history =cutting_stock_history(tenant_id='1', stock_id=product, instock_qty=float(
+                            stock_history =cutting_stock_history(tenant_id=tenant_id, stock_id=product, instock_qty=float(
                                             quantity_r), after_process="0", change_in_qty="0", process="inward")
                             stock_history.save()
         else :

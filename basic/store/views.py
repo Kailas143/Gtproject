@@ -16,6 +16,7 @@ from inward.models import Dc_details, Dc_materials
 
 from .models import Stock, Stock_History
 from .serializers import Stock_History_Serializer, StockSerializer
+from .utilities import get_tenant
 
 
 # Create your views here.
@@ -43,15 +44,16 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
         data = {}
         # serialization validation
         if serializer.is_valid():
+            tenant_id=get_tenant(request)
 
             quantity_r = float(request.data['quantity'])
-            tenant_id_r=request.data['tenant_id']
+            tenant_id_r=tenant_id
             raw_materials_r = request.data['raw_materials']
             min_stock_r = float(request.data['min_stock'])
             max_stock_r = float(request.data['max_stock'])
             avg_stock_r = float(request.data['avg_stock'])
             # filtering stock based on productdetails given by the user,first is given because filter is giving filtered list,here we need only single or first project 
-            stock_data = Stock.objects.filter(
+            stock_data = Stock.period.current_financialyear(id=tenant_id).filter(
                 raw_materials=raw_materials_r).first()
 
             print(raw_materials_r)
@@ -90,7 +92,7 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
 
                 # new stock history will be created
 
-                stock_history = Stock_History(stock_id=product,tenant_id='1',instock_qty=float(
+                stock_history = Stock_History(stock_id=product,tenant_id=tenant_id_r,instock_qty=float(
                     quantity_r), after_process="0.0",change_in_qty="0.0", process="inward")
                 stock_history.save()
 

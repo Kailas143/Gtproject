@@ -7,8 +7,8 @@ from django.db import models
 class FinancialQuerySet(models.QuerySet):
     def current_financialyear(self,user):
         year = datetime.datetime.now().year
-        current_finyear_start= datetime.datetime(year, 4, 1)
-        current_finyear_end= datetime.datetime(year, 3, 31)
+        current_finyear_start= datetime.datetime(year, 4, 1)#current_finyear_start 2021
+        current_finyear_end= datetime.datetime(year+1, 3, 31)#current_finyear_end 2022
         return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=user.id)
 
 class Dispatch_details(models.Model):
