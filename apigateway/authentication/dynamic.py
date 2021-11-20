@@ -6,15 +6,19 @@ mydb=mysql.connector.connect(
         user = 'root',
         password ='password',
         database ='dynamic_db', 
+       
 )
 
-mycursor=mydb.cursor()
-mycursor.execute("Select * from domain ")
-domain_details=mycursor.fetchall()
+print(mydb,'---')
+
+# mycursor=mydb.cursor()
+# mycursor.execute("Select * from domain ")
+# domain_details=mycursor.fetchall()
 
 
 
 def dynamic_link(service,api):
+    
     mycursor=mydb.cursor()
     query="select * from domain WHERE services = '%s'" % service 
     mycursor.execute(query)

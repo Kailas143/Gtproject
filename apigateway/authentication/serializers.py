@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from .models import Employee, Tenant_Company, User, emp_roles
+from rest_framework_simplejwt.tokens import RefreshToken,TokenError
 
 User=get_user_model()
 
@@ -10,7 +11,25 @@ class TenantSerializer(serializers.ModelSerializer):
         model=Tenant_Company
         fields=['id','company_name','city','domain','address','phone_number','state','country','joined_data']
 
-        
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+    # default_error_message = {
+    #     'bad_token':' ffff'
+    # }
+
+    def validate(self, attrs):
+        self.token = attrs['refresh']
+        return attrs
+
+    def save(self, **kwargs):
+
+        try:
+            RefreshToken(self.token).blacklist()
+
+        except TokenError:
+            print('errir')
 
 class RegisterSerializer(serializers.ModelSerializer):
     # tenant_company=TenantSerializer(many=True,read_only=True)

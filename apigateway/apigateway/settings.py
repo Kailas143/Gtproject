@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-1)du6n=8=8q_mw#5@c#9@2!syrfo!*kf$v-zc5_+^t0f0mhf@2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*','192.168.1.16','example.com','.example.com']
+ALLOWED_HOSTS = ['*','192.168.1.16','example.com','.example.com','172.16.16.56']
 
 
 # Application definition
@@ -40,12 +40,15 @@ INSTALLED_APPS = [
     'authentication',
     'rest_framework',
     # 'rest_framework.authtoken',
-    'rest_framework_simplejwt'
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -86,7 +89,8 @@ DATABASES = {
         'PASSWORD' : 'password',
         'PORT' :'',
        'OPTIONS': {
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+                'init_command':  'SET default_storage_engine=INNODB;'
+                
                   }
     },
        'dynamic': {
@@ -100,6 +104,7 @@ DATABASES = {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
                   }
     }
+   
 }
 
 # Password validation
@@ -151,7 +156,7 @@ REST_FRAMEWORK={
     'DEFAULT_AUTHENTICATION_CLASSES':('rest_framework_simplejwt.authentication.JWTAuthentication',)
 }
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
    
 }
@@ -162,3 +167,5 @@ SIMPLE_JWT = {
 #         'rest_framework.authentication.BasicAuthentication',
 #      ]
 #  }
+CORS_ALLOW_ALL_ORIGINS = True 
+CORS_ALLOW_CREDENTIALS = True

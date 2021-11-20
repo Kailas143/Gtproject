@@ -4,22 +4,22 @@ import json
 # from . utilities import get_tenant
 import requests
 from django.http import HttpResponseRedirect
-
+from rest_framework_simplejwt.token_blacklist.models  import OutstandingToken,BlacklistedToken
 from django.template import RequestContext
 from rest_framework import generics, mixins, response, status, viewsets
 from rest_framework.authentication import (BasicAuthentication,
                                            SessionAuthentication,
                                            TokenAuthentication)
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from .dynamic import dynamic_link
 # from .dynamic import dynamic_link
 from .forms import UserForm
 from .models import Employee, Tenant_Company, User,emp_roles
-from . permissions import IsInward
+from . permissions import IsDispatch, IsInward,Isadmin
 from .serializers import RegisterSerializer, TenantSerializer,Employee_RegisterSerializer,emp_role_serializers,employee_roles, employee_roles_details
 
 
@@ -36,7 +36,7 @@ class emp_roles_post(generics.GenericAPIView,APIView,mixins.CreateModelMixin,mix
         return self.create(request)
 
 class emp_roles_add(generics.GenericAPIView,APIView,mixins.CreateModelMixin,mixins.ListModelMixin):
-    permission_classes = [IsAuthenticated,IsInward]
+    # permission_classes = [IsAuthenticated,IsInward]
     serializer_class=employee_roles
     queryset=Employee.objects.all()
  
@@ -100,32 +100,7 @@ class RegisterAPI(generics.GenericAPIView, mixins.ListModelMixin, APIView):
         serializer = RegisterSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            # user_name=request.data['username']
-            # domain_r=request.data['tenant_company']
-            # password_r=request.data['password']
-            # is_admin_r=request.data['is_admin']
-            # is_employee_r=request.data['is_employee']
-            # print(is_admin_r)
-
-            # checking that domain exist or not
-            # user_details=User.objects.filter(username=user_name).exists()
-            # if user already exist already exist with this domain then below message will be shown
-            # if user_details :
-            #     data['error'] = 'This user is already registered !!!'
-            # #if domain is already not registered then the serializer should save
-            # else:
-
-            # reg=User(
-
-            # tenant_company = Tenant_Company.objects.get(id=domain_r),
-
-            # username=user_name
-
-            # )
-
-            # reg.set_password(password_r)
-            # reg.save()
-            # account =reg
+         
             account = serializer.save()
             data['response'] = 'Registerd Succesfully'
             data['username'] = account.username
@@ -134,8 +109,7 @@ class RegisterAPI(generics.GenericAPIView, mixins.ListModelMixin, APIView):
             token, create = Token.objects.get_or_create(user=account)
             domain=account.tenant_company.domain
             print(domain)
-            redirect = 'http://' + domain + '.company' + '.localhost:8000'
-            return HttpResponseRedirect(redirect)
+           
 
 
             # data['token'] = token.key
@@ -222,6 +196,10 @@ class branding_register(APIView):
             "domain" :request.data['domain'],
             "country": request.data['country']
 
+
+
+
+
         }
         # connecting the url from the branding project and then the datas as dictionary as passing with the url for POST method
         
@@ -233,7 +211,7 @@ class branding_register(APIView):
 class product_Api(APIView):
 
     serializer_class = RegisterSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated,]
 
     def get(self, request):
         data = {}
@@ -290,7 +268,7 @@ class product_Api(APIView):
 
 class Raw_Api(APIView):
     serializer_class = RegisterSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated,]
 
     def get(self, request):
         data = {}
@@ -343,28 +321,9 @@ class Raw_Api(APIView):
             return Response(data)
 
 
-class Raw_Update_Api(APIView):
-    serializer_class = RegisterSerializer
-
-    def get(self, request):
-        data = {}
-        user_r = request.user.username
-
-        user = User.objects.filter(username=user_r, is_admin=True).exists()
-        print(user)
-        # if request.user.is_admin :
-        if user:
-            response = requests.get(
-                'http://127.0.0.1:8001/raw/<int:id>/').json()
-            return Response(response)
-        else:
-            data['error'] = 'You dont have rights to access'
-            return Response(data)
-
-
 class Process_Cost_Api(APIView):
     serializer_class = RegisterSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated,]
 
     def get(self, request):
         data = {}
@@ -414,7 +373,7 @@ class Process_Cost_Api(APIView):
 
 class Process_Cost_Update(APIView):
     serializer_class = RegisterSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated,]
 
     def get(self, request):
         data = {}
@@ -443,7 +402,7 @@ class Process_Cost_Update(APIView):
 
 class ProductspecAPI_Api(APIView):
     serializer_class = RegisterSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated,]
 
     def get(self, request):
         data = {}
@@ -493,7 +452,7 @@ class ProductspecAPI_Api(APIView):
 
 class Productrequirements_Api(APIView):
     serializer_class = RegisterSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated,]
 
     def get(self, request):
         data = {}
@@ -545,7 +504,7 @@ class Productrequirements_Api(APIView):
 
 class Company_details_Api(APIView):
     serializer_class = RegisterSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated,]
 
     def get(self, request):
         data = {}
@@ -569,46 +528,42 @@ class Company_details_Api(APIView):
 
     def post(self, request):
         data = {}
-        user_r = request.user.username
-        tenant_id_r = request.user.tenant_company.id
-        user = User.admin_objects.get_queryset(username=user_r)
-        if user.exists():
-            datas = {
-                "tenant_id": [tenant_id_r],
-                "company_name": request.data["company_name"],
-                "address_line1": request.data["address_line1"],
-                "address_line2": request.data["address_line2"],
-                "address_line3": request.data["address_line3"],
-                "office_email": request.data["office_email"],
-                "office_pnone_no": request.data["office_pnone_no"],
-                "gst_no": request.data["gst_no"],
-                "acc_no": request.data["acc_no"],
-                "ifsc_code": request.data["ifsc_code"],
-                "bank_name": request.data["bank_name"],
-                "branch_name": request.data["branch_name"],
-                "purchase_company": request.data["purchase_company"],
-                "ratings": request.data["ratings"],
-                "vendor_code": request.data["vendor_code"],
-                "description ": request.data["description "],
-
-            }
-            services = 'admin'
-            dynamic = dynamic_link(services, 'process/cost')
-            response = requests.post(dynamic, data=datas).json()
-            return Response(response)
+        # user_r = request.user.username
+        # tenant_id_r = request.user.tenant_company.id
+        # user = User.admin_objects.get_queryset(username=user_r)
+        # if user.exists():
+        services = 'admin'
+        dynamic = dynamic_link(services, 'company/details')
+        response = requests.post(dynamic, data=request.data).json()
+        return Response(response)
 
         # else if user is not admin then this message will be shown
 
-        else:
+class company_details_list(APIView):
+    def get(self,request):
+        services = 'admin'
+        dynamic = dynamic_link(services, 'company/details')
+        response=requests.get(dynamic).json()
+        return Response(response)
 
-            data['error'] = 'You dont have rights to access'
+class company_update(APIView):
+    def get(self,request,id):
+        services = 'admin'
+        dynamic = dynamic_link(services, 'company/details/' + str(id))
+        response=requests.get(dynamic).json()
+        return Response(response)
+    
+    def put(self,request,id):
+        services = 'admin'
+        dynamic = dynamic_link(services, 'company/details/' + str(id))
+        response=requests.put(dynamic,data=request.data).json()
+        return Response(response)
 
-            return Response(data)
 
 
 class supliers_contact__Api(APIView):
     serializer_class = RegisterSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated,]
 
     def get(self, request):
         data = {}
@@ -661,7 +616,7 @@ class supliers_contact__Api(APIView):
 
 class process_Api(APIView):
     serializer_class = RegisterSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated,]
 
     def get(self, request):
         data = {}
@@ -709,20 +664,224 @@ class process_Api(APIView):
 
             return Response(data)
 
-
-class Dispatch(APIView):
+class get_inward_dc_details(APIView):
+    # permission_classes = [IsAuthenticated,IsInward]
     def get(self, request):
+        data = []
+        services = 'basic'
+        dynamic = dynamic_link(services, 'inward/dc/details')
+        response = requests.get(dynamic).json()
+        for r in response :
+            data.append(r)
+            #iterating the list then saving the rawmaterials to anew variable
+            for d in data:
+                
+                cid=d['company_id']
+              
+            services = 'admin'
+            
+            dynamic = dynamic_link(services, 'company/details/' + str(cid))#for loop the dc materials details then access the rawmaterial integer field then filter the raw materials based on that id
+            comp_res=requests.get(dynamic).json()#response of raw materials based on the id
+
+           
+            d['company_id']=comp_res
+            #replacing the raw_materials value from list to response we got,so instead of the number we it will show details of that particular raw materials
+
+        return Response(data)
+      
+class get_inward_dc_materials(APIView):
+    # permission_classes = [IsAuthenticated,IsInward]
+    def get(self, request):
+        data = []
+        services = 'basic'
+        dynamic = dynamic_link(services, 'inward/dc/materials')
+        response = requests.get(dynamic).json()
+        for r in response :
+            data.append(r)
+            #iterating the list then saving the rawmaterials to anew variable
+            for d in data:
+               
+                rid=d['raw_materials']
+              
+                services = 'admin'
+            
+            dynamic = dynamic_link(services, 'raw/' + str(rid))#for loop the dc materials details then access the rawmaterial integer field then filter the raw materials based on that id
+            raw_res=requests.get(dynamic).json()#response of raw materials based on the id
+
+           
+            d['raw_materials']=raw_res
+            #replacing the raw_materials value from list to response we got,so instead of the number we it will show details of that particular raw materials
+
+        return Response(data)
+      
+
+class get_dispatch_dc_materials(APIView):
+    # permission_classes = [IsAuthenticated,IsInward]
+    def get(self, request):
+        data = []
         services = 'basic'
         dynamic = dynamic_link(services, 'dispatch/materials')
         response = requests.get(dynamic).json()
-        # response = requests.get(
-        #     'http://127.0.0.1:8000/dispatch/materials/').json()
-        # response=requests.get('http://127.0.0.1:8000/product/requ/'+str(id)+'/').json()
-        for r in response:
-            r_r = r['product_details']
-            print(r_r)
-            new_response = requests.get(
-                dynamic+str(id)+'/').json()
-            print(new_response)
+        for r in response :
+            data.append(r)
+            for d in data:
+               
+                pid=d['product_details']
+                services = 'admin'
+            
+            dynamic = dynamic_link(services, 'prod/req/' + str(pid))
+            prod_res=requests.get(dynamic).json()
+            d['product_details']=prod_res
 
+        return Response(data)
+
+class get_dispatch_dc_details(APIView):
+    # permission_classes = [IsAuthenticated,IsInward]
+    def get(self, request):
+        data = []
+        services = 'basic'
+        dynamic = dynamic_link(services, 'dispatch/details')
+        response = requests.get(dynamic).json()
+        for r in response :
+            data.append(r)
+            #iterating the list then saving the rawmaterials to anew variable
+            for d in data:
+               
+                cid=d['company_id']
+              
+            services = 'admin'
+            dynamic = dynamic_link(services, 'company/details/' + str(cid))#for loop the dc materials details then access the rawmaterial integer field then filter the raw materials based on that id
+            comp_res=requests.get(dynamic).json()#response of raw materials based on the id
+            d['company_id']=comp_res
+            #replacing the raw_materials value from list to response we got,so instead of the number we it will show details of that particular raw materials
+
+        return Response(data)
+       
+       
+
+
+class quality_unchecked_dispatch_materials(APIView):
+    # permission_classes = [IsAuthenticated,IsInward]
+    def get(self, request):
+        data = []
+        services = 'basic'
+        dynamic = dynamic_link(services, 'dispatch/materials')
+        response = requests.get(dynamic).json()
+        for r in response:
+            if r['quality_checked']==False:
+
+                data.append(r)
+                for d in data :
+                   
+                    pid=d['product_details']
+                    services = 'admin'
+                dynamic = dynamic_link(services, 'prod/req/' + str(pid))
+                prod_res=requests.get(dynamic).json()
+                d['product_details']=prod_res
+        return Response(data)
+    
+class update_inward_dc(APIView):
+    def get(self,request,id):
+        services='basic'
+        dynamic=dynamic_link(services,'inward/dc/materials/'+str(id))
+        print(dynamic)
+        response=requests.get(dynamic).json()
+        
         return Response(response)
+
+    def put(self,request,id):
+        
+        datas={
+                "tenant_id": request.data['tenant_id'],
+                "raw_materials": request.data['raw_materials'],
+                "qty": request.data['qty'],
+                "bal_qty": request.data['bal_qty'],
+                "error_qty": request.data['error_qty'],
+                "quality_checked":request.data['quality_checked'],
+                "dc_details" : request.data['dc_details']
+        }
+
+        services='basic'
+        dynamic=dynamic_link(services,'inward/dc/materials/'+str(id))
+        response=requests.put(dynamic,data=datas).json()
+        return Response("Successfully updated")
+
+class add_inward(APIView):
+    def post(self,request):
+
+        services = 'basic'
+        dynamic = dynamic_link(services, 'inward/dc/details/add')
+        response = requests.post(dynamic,json=request.data).json()
+        print(response,'rrr')
+        return Response(response)
+
+
+class add_dispatch(APIView):
+    def post(self,request):
+
+        services = 'basic'
+        dynamic = dynamic_link(services, 'inward/dc/details/add')
+        response = requests.post(dynamic,json=request.data).json()
+        print(response,'rrr')
+        return Response(response)
+
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        Refresh_token = request.data["refresh"]
+        token = RefreshToken(Refresh_token )
+        token.blacklist()
+        return Response("Successful Logout", status=status.HTTP_200_OK)
+
+class sales_list(APIView):
+    def get(self,request):
+        data = []
+        services='sales'
+        dynamic=dynamic_link(services,'sales/dispatchinv')
+        response=requests.get(dynamic).json()
+        for r in response:
+            data.append(r)
+            for d in data :
+                cid=d['companycode']
+            services = 'admin'
+            dynamic = dynamic_link(services, 'company/'+ str(cid))
+            comp=requests.get(dynamic).json()
+                
+            d['companycode']=comp
+        return Response(response)
+
+#get all rawmaterial details based on the company id 
+class company_product_rawmaterials(APIView):
+    def get(self,request,cid):
+        raw_materials=[]
+        services='admin'
+        dynamic=dynamic_link(services,'price/company/'+str(cid))
+        response=requests.get(dynamic).json()
+        print(response,'resp')
+        for r in response :
+            pid=r['id']
+            dynamic=dynamic_link(services,'prod/requ/'+str(pid))
+            req=requests.get(dynamic).json()
+            print(req,'reqq')
+            for j in req :
+                dynamic=dynamic_link(services,'raw/'+str(j['raw_component']))
+                raw_comp=requests.get(dynamic).json()
+                error=0
+                for rm in raw_materials :
+                    if rm['id']==(j['raw_component']):
+                        error=1
+                        break
+                if error==0 :   
+                    raw_materials.append(raw_comp)
+        return Response(raw_materials)
+
+class dispaatch_list_production(APIView):
+    def get(self,request,cid):
+        raw_materials=[]
+        services='admin'
+        dynamic=dynamic_link(services,'price/company/'+str(cid))
+        response=requests.get(dynamic).json()
+        print(response,'resp')
+        
