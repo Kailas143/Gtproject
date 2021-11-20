@@ -16,7 +16,7 @@ from store.models import Stock, Stock_History
 from .dynamic import dynamic_link
 from .models import Dc_details, Dc_materials
 # Create your views here.
-from .serializers import (Dc_details_serializers, Dc_materials_serializers,
+from .serializers import (Dc_details_serializers, Dc_materials_serializers, Dc_materials_Update_serializers,
                           List_dc_serializers)
 from .utilities import get_tenant
 
@@ -40,30 +40,32 @@ class DC_details_add(generics.GenericAPIView,APIView,mixins.ListModelMixin):
 
 
     def post(self,request):
-        
+        print(request.data,'ddd')
         dcdata=request.data[0]
         dcmaterials=request.data[1]
         serializer = Dc_details_serializers(
             data=dcdata, context={'request': request})
         data = {}
-       
+        print(dcdata,'-ddd')
        
         if serializer.is_valid():
             company_idr = dcdata['company_id']
             dc_number_r = dcdata['dc_number']
+            tenant_id_r = dcdata['tenant_id']
             #calling the get_tenant function from utilities file
-            tenant_id = get_tenant(request)
+            # tenant_id = get_tenant(request)
             #filtering the dc details based on the financial year,to check wheather the dc details with same company exists or not
-            dc = Dc_details.period.current_financialyear(id=tenant_id).filter(
+            dc = Dc_details.objects.current_financialyear(id=tenant_id_r).filter(
                 company_id=company_idr, dc_number=dc_number_r)
             print(dc)
             if dc:
                 data['error'] = 'Company with this dc number already exist !!! Try with another dc number'
             else:
                 #here passing the tenant id value to the serializer of dc
-                inward=serializer.save(tenant_id=tenant_id)
+                inward=serializer.save(tenant_id=tenant_id_r)
+             
                 for dc in dcmaterials :
-                    materials=Dc_materials(tenant_id=tenant_id,dc_details=Dc_details.objects.get(id=inward.id),raw_materials=dc['raw_materials'],qty=dc['qty'],bal_qty=dc['bal_qty'],error_qty=dc['error_qty'])
+                    materials=Dc_materials(tenant_id=tenant_id_r,dc_details=Dc_details.objects.get(id=inward.id),raw_materials=dc['raw_materials'],qty=dc['qty'],bal_qty=dc['bal_qty'],error_qty=dc['error_qty'])
                     materials.save()
                     print(materials.raw_materials)
                     raw_materials_r=materials.raw_materials
@@ -97,20 +99,31 @@ class DC_details_add(generics.GenericAPIView,APIView,mixins.ListModelMixin):
 
 
 
-
-
-
 class Dc_MaterialsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
     
     serializer_class = Dc_materials_serializers
     queryset = Dc_materials.objects.all()
+
+
+    def get(self, request):
+            return self.list(request)
+
+    def post(self, request):
+        return self.create(request)
+
+
+
+
+class Dc_Materials_update_API(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    
+    serializer_class = Dc_materials_Update_serializers
+    queryset = Dc_materials.objects.all()
     lookup_field = 'id'
 
-    def get(self, request,id=None):
-        if id:
-            return self.retrieve(request,id)
-        else:
-            return self.list(request)
+    def get(self, request,id):
+        
+        return self.retrieve(request,id)
+      
 
     def post(self, request):
         return self.create(request)
@@ -120,6 +133,22 @@ class Dc_MaterialsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.L
 
     def delete(self, request, id):
         return self.destroy(request, id)
+    
+  
+
+class Dc_Materials_patch_API(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    
+    serializer_class = Dc_materials_Update_serializers
+    queryset = Dc_materials.objects.all()
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        queryset =Dc_materials.objects.filter(quality_checked=False)
+        return queryset
+      
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
 
 
 class Dc_detailsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
@@ -144,8 +173,12 @@ class Dc_detailsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.Lis
         return self.destroy(request, id)
 
 
+
+
+
+
 # class DC_materials_year(APIView):
-#     pass
+    pass
 # class Dc_details_year(generics.GenericAPIView,mixins.ListModelMixin):
 #     serializer_class=List_dc_serializers
 #     queryset=Dc_details.period.current_financialyear(id='1')

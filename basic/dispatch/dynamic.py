@@ -1,15 +1,16 @@
 import mysql.connector
+import pymysql
 
-mydb=mysql.connector.connect(
+mydb=pymysql.connect(
         host  = 'localhost',
         user = 'root',
         password ='password',
         database ='dynamic_db', 
 )
 
-mycursor=mydb.cursor()
-mycursor.execute("Select * from domain ")
-domain_details=mycursor.fetchall()
+# mycursor=mydb.cursor()
+# mycursor.execute("Select * from domain ")
+# domain_details=mycursor.fetchall()
 
 
 

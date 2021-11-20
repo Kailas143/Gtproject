@@ -12,6 +12,7 @@
        "product": 1,
         "qty": 12.0,
         "bal_qty": 121.0,
+        "raw_materials":1,
         "error_qty": -1.0
 
 }

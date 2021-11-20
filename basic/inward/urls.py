@@ -6,7 +6,7 @@ app_name='inward'
 
 urlpatterns = [
     path('dc/materials/',views.Dc_MaterialsAPI.as_view(),name='Dc_MaterialsAPI'),
-    path('dc/materials/<int:id>/',views.Dc_MaterialsAPI.as_view(),name='Dc_MaterialsAPI'),
+    path('dc/materials/<int:id>/',views.Dc_Materials_update_API.as_view(),name='Dc_MaterialsAPI'),
     
 
     path('dc/details/',views.Dc_detailsAPI.as_view(),name='Dc_details'),
@@ -14,6 +14,11 @@ urlpatterns = [
    
     path('dc/details/add/',views.DC_details_add.as_view(),name='DC_details_add'),
     path('user/<str:domain>/',views.user_tenant.as_view(),name='user_tenant'),
+
+
+    # path('dc/material/quality/<int:id>/',views.Dc_materials_quality.as_view()),
+
+    # path('dc/material/patch/<int:id>/',views.Dc_Materials_patch_API.as_view())
 
    
    

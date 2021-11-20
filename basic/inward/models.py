@@ -25,8 +25,8 @@ class Dc_details(models.Model):
     inward_date=models.DateTimeField(auto_now=True)
     inward_worker=models.CharField(max_length=1024)
     financial_period=models.DateField(auto_now=True)
-    objects=models.Manager()
-    period=FinancialQuerySet.as_manager()
+    objects=FinancialQuerySet.as_manager()
+
 
     def __str__(self):
         return str(self.id)
@@ -40,9 +40,8 @@ class Dc_materials(models.Model):
     bal_qty= models.FloatField()
     error_qty= models.FloatField()
     financial_period=models.DateField(auto_now=True)
-    objects=models.Manager()
-    period=FinancialQuerySet.as_manager()
-
+    objects=FinancialQuerySet.as_manager()
+    
 
     
 

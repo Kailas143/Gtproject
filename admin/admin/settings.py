@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'master',
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -83,7 +84,7 @@ DATABASES = {
         'HOST' : 'localhost',
         'USER' : 'root',
         'PASSWORD' :'password',
-        'PORT' :'',
+        'PORT' :'3306',
        'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
                   }
@@ -156,4 +157,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #     ],
    
 #     }
-    
+CORS_ALLOW_ALL_ORIGINS = True 
+CORS_ALLOW_CREDENTIALS = True

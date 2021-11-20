@@ -6,7 +6,7 @@ app_name='dispatch'
 
 urlpatterns = [
     path('materials/',views.Dispatch_MaterialsAPI.as_view(),name='Dispatch_MaterialsAPI'),
-    path('materials/<int:id>/',views.Dispatch_MaterialsAPI.as_view(),name='Dispatch_MaterialsAPI'),
+    path('materials/<int:id>/',views.Dispatch_Materials_update_API.as_view(),name='Dispatch_MaterialsAPI'),
     # path('materials/year/',views.Dispatch_materials_year.as_view(),name='Dispatch_materials_year'),
 
     path('details/',views.Dispatch_detailsAPI.as_view(),name='Dispatch_details'),
@@ -17,8 +17,10 @@ urlpatterns = [
     # path('login/',views.LoginAPI.as_view(),name='LoginAPI'),
     path('api/details/',views.Dispatch_details_post_API.as_view(),name='Dispatch_details_post_API'),
     path('stock/',views.StockAPI.as_view(),name='StockAPI'),
+    path('quality/<int:pk>/',views.dispatch_material_quantity_patch.as_view()),
 
-    
+    path('materials/quality/update/<int:id>/',views.Dispatch_Materials_patch_API.as_view()),
+    path('materials/update/<int:id>/',views.Dispatch_Materials_patch.as_view())
 
 
 ]

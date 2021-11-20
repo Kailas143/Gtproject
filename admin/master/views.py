@@ -7,13 +7,15 @@ from django.shortcuts import render
 # from rest_framework.authtoken.models import Token
 # from rest_framework.authentication import SessionAuthentication, BasicAuthentication,TokenAuthentication
 from rest_framework import filters, generics, mixins, viewsets
+from rest_framework import serializers
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 # from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 
 from .dynamic import dynamic_link
 from .models import (Process, Processcost, Product, Product_price,
-                     Productrequirements, Productspec, Rawcomponent, Roles,
+                     Productrequirements, Productspec, Rawcomponent,
                      company_details, supliers_contact_details)
 from .serializers import (Company_detailsSerializer,
                           Company_detailsUpdateSerializer,
@@ -23,10 +25,10 @@ from .serializers import (Company_detailsSerializer,
                           ProductrequirementsSerializer, ProductSerializer,
                           ProductspecSerializer, ProductspecUpdateSerializer,
                           ProductUpdaterequirementsSerializer,
-                          ProductUpdateSerializer, RawcomponentSerializer,
-                          RawcomponentUpdateSerializer, RolesSerializer,
+                          ProductUpdateSerializer, RawcomponentSerializer,ProductrequSerializer,Product_requirements_Serializer,
+                          RawcomponentUpdateSerializer, 
                           Supliers_contactSerializer,
-                          Supliers_contactUpdateSerializer)
+                          Supliers_contactUpdateSerializer, Prod_serializers)
 
 from . utilities import get_tenant
 
@@ -186,8 +188,8 @@ class ProductAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListMod
         serializer =  ProductSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            tenant_id=get_tenant(request)
-            serializer.save(tenant_id=tenant_id)
+            # tenant_id=get_tenant(request)
+            serializer.save()
             data["success"]="The record created successfully"
         else : 
             data["error"]= "Error are occured !! Try again"
@@ -206,6 +208,27 @@ class ProductAPIUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
                 def delete(self,request,id):
                     return self.destroy(request,id)
 
+class get_ProductreqAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin,mixins.RetrieveModelMixin):
+    serializer_class = ProductrequSerializer
+    queryset = Productrequirements.objects.all()
+    lookup_field ='id'
+
+                   
+    def get(self,request,id=None) :
+        if id :
+            return self.retrieve(request,id)
+        else :
+            return self.list(request)
+
+class company_id(generics.GenericAPIView,mixins.ListModelMixin,mixins.RetrieveModelMixin):
+    queryset=company_details.objects.all()
+    serializer_class=Company_detailsSerializer
+    lookup_field ='id'
+
+    def get(self,request,id):
+        return self.retrieve(request,id)
+
+
 class ProductreqAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin):
     serializer_class = ProductrequirementsSerializer
     queryset = Productrequirements.objects.all()
@@ -216,10 +239,12 @@ class ProductreqAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.List
         serializer = ProductrequirementsSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            tenant_id=get_tenant(request)
-            serializer.save(tenant_id=tenant_id)
+            # tenant_id=get_tenant(request)
+            serializer.save()
+            data['status']=True
             data["success"]="The record created successfully"
         else : 
+            data['status']=False
             data["error"]= "Error are occured !! Try again"
         return Response(data)
 
@@ -245,14 +270,18 @@ class Company_detailsApi(generics.GenericAPIView, mixins.CreateModelMixin,mixins
         return self.list(request)
 
     def post(self,request):
+        # return self.create(request)
         serializer = Company_detailsSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            tenant_id=get_tenant(request)
-            serializer.save(tenant_id=tenant_id)
-            data["success"]="The record created successfully"
+        #     tenant_id=get_tenant(request)
+        #     serializer.save(tenant_id=tenant_id)
+              serializer.save()
+              data['status']=True
+              data["data"]="The record created successfully"
         else : 
-            data["error"]= "Error are occured !! Try again"
+            data['status']=False
+            data["data"]= "Error are occured !! Try again"
         return Response(data)
 
 
@@ -265,7 +294,7 @@ class Company_detailsUpdateApi(generics.GenericAPIView, mixins.CreateModelMixin,
     def get(self,request,id):
         return self.retrieve(request,id)
 
-    def put(self,request,id=None):
+    def put(self,request,id):
         return self.update(request,id)
     
     def delete(self,request,id):
@@ -304,28 +333,35 @@ class Supliers_contactUpdateApi(generics.GenericAPIView, mixins.CreateModelMixin
     def delete(self,request,id):
         return self.destroy(request,id)
 
-
-class Role_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin):
-    serializer_class = RolesSerializer
-    queryset= Roles.objects.all()
-    lookup_field ='id'
-
-    def get(self,request,id):
+class Prodrequi(APIView):
+    def prod_req(self,pid):
+        prod=Productrequirements.objects.filter(product_price__id=pid)
+        return prod
+    
+    def get(self, request,pid):
+       
+        prod_id=self.prod_req(pid)
         
-        return self.retrieve(request,id)
-        
-    
-    
-    
-    def put(self,request,id=None) :
-        return self.update(request,id)
+        serializer = ProductrequirementsSerializer(prod_id, many=True)
+        return Response(serializer.data)
 
+class Prodrequi_raw(APIView):
+    def prod_req(self,rid):
+        prod=Productrequirements.objects.filter(raw_component__id=rid)
+        return prod
+    
+    def get(self, request,rid):
+       
+        prod_id=self.prod_req(rid)
+        
+        serializer = Product_requirements_Serializer(prod_id, many=True)
+        return Response(serializer.data)
 
 
 
 class ProdReq(APIView):
     def prod_req(self, product__id):
-        return Productrequirements.objects.filter(product=product__id)
+        return Productrequirements.objects.filter(product_price__product__id=product__id)
     # queryset = Productrequirements.objects.filter(product__id)
     # serializer_class = ProductrequirementsSerializer
     # lookup_fields = ('product__id',)
@@ -343,11 +379,13 @@ class ProdReq(APIView):
 
 class prod_price_company(APIView):
     def company_filter(self,company):
-        return Product_price.objects.filter(company=company)
+        return Product_price.objects.filter(company__id=company)
     
     def get(self,request,company):
         company_id=self.company_filter(company)
-        serializer=Product_price_Serializer(company_id,many=True)
+        print('ffff')
+        serializer=Prod_serializers(company_id,many=True)
+    
         return Response(serializer.data)
 
 class prod_price_product(APIView):
@@ -357,6 +395,8 @@ class prod_price_product(APIView):
     def get(self,request,poid,cmpid):
         product_id=self.product_filter(poid,cmpid)
         serializer=Product_price_Serializer(product_id,many=True)
+
+
         return Response(serializer.data)
 
 class prod_price_id(APIView):
@@ -417,4 +457,15 @@ class process_card_list(APIView) :
         subprocess_detail=self.subprocess_filter(poid=poid,cmpid=cmpid)
         serializer=Product_price_Serializer(subprocess_detail,many=True)
         return Response(serializer.data)
-        
+
+
+# class prod_price_company(APIView):
+#     def comp_filter(self,cid):
+#         cprod=Product_price.objects.filter(company__id=cid)
+#         print(cprod,'cc')
+#         return cprod
+
+#     def get(self,request,cid):
+#         produ=self.comp_filter(cid)
+#         serializer=Product_price_Serializer(produ)
+#         return Response(serializer.data)

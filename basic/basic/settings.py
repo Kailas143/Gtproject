@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-h3k&2k&w0kign+mv$u+0myi7urjue4-09a#d&3xig=g!ha0#7&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*','192.168.1.16']
+ALLOWED_HOSTS = ['*','192.168.1.16','172.16.16.55','172.16.16.51']
 
 
 # Application definition
@@ -43,12 +43,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'dispatch',
     'outward',
+    'corsheaders',
     'production'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -164,3 +166,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #         'rest_framework.parsers.JSONParser',
 #     )
 # }
+CORS_ALLOW_ALL_ORIGINS = True 
+CORS_ALLOW_CREDENTIALS = True

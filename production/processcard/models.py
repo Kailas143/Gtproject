@@ -1,6 +1,6 @@
 from django.db import models
 import datetime
-
+from mptt.models import MPTTModel, TreeForeignKey
 # Create your models here.
 
 class FinancialQuerySet(models.QuerySet):
@@ -10,26 +10,87 @@ class FinancialQuerySet(models.QuerySet):
         current_finyear_end= datetime.datetime(year+1, 3, 31)
         return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=id)
 
+# class Mainprocess(models.Model):
+#   tenant_id=models.PositiveIntegerField()
+#   title = models.CharField(max_length=1024)
+#   process_details = TreeForeignKey('Process_name',null=True,blank=True, on_delete=models.CASCADE)
+#   financial_period=models.DateField(auto_now_add=True)
+#   worker_name=models.CharField(max_length=1054)
 
-class Mainprocess(models.Model) :
-    process_name = models.CharField(max_length=1054)
-    stage =models.PositiveIntegerField()
-    tenant_id=models.PositiveIntegerField()
-    financial_period=models.DateField(auto_now_add=True)
-    worker_name=models.CharField(max_length=1054)
+#   def __str__(self):
+#     return self.title
 
-    def __str__(self):
-        return str(self.id)
+
+# class Mainprocess_details(MPTTModel):
+#   process_name=models.CharField(max_length=1024)
+#   test =models.CharField(max_length=1024,null=True)
+#   cost =models.FloatField(null=True)
+#   parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True, on_delete=models.CASCADE)
+#   slug = models.SlugField(unique=True)
+#   mixing=models.BooleanField(default=False)
+
+#   class MPTTMeta:
+#     order_insertion_by = ['process_name']
+
+#   class Meta:
+#     unique_together = (('parent', 'slug',))
+#     verbose_name_plural = 'mainprocess'
+
+#   def get_slug_list(self):
+#     try:
+#       ancestors = self.get_ancestors(include_self=True)
+#     except:
+#       ancestors = []
+#     else:
+#       ancestors = [ i.slug for i in ancestors]
+#     slugs = []
+#     for i in range(len(ancestors)):
+#       slugs.append('/'.join(ancestors[:i+1]))
+#     return slugs
+
+#   def __str__(self):
+#     return self.process_name
+
+
+class Mainprocess_details(MPTTModel):
+  process_name=models.CharField(max_length=1024)
+  test =models.CharField(max_length=1024,null=True)
+  cost =models.FloatField(null=True)
+  parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True, on_delete=models.CASCADE)
+  slug = models.SlugField(unique=True)
+  mixing=models.BooleanField(default=False)
+
+  class MPTTMeta:
+    order_insertion_by = ['process_name']
+
+  class Meta:
+    unique_together = (('parent', 'slug',))
+    verbose_name_plural = 'mainprocess'
+
+  def get_slug_list(self):
+    try:
+      ancestors = self.get_ancestors(include_self=True)
+    except:
+      ancestors = []
+    else:
+      ancestors = [ i.slug for i in ancestors]
+    slugs = []
+    for i in range(len(ancestors)):
+      slugs.append('/'.join(ancestors[:i+1]))
+    return slugs
+
+  def __str__(self):
+    return self.process_name
     
 
 class Subprocess(models.Model) :
-    mainprocess=models.ForeignKey(Mainprocess,on_delete=models.CASCADE)
+    mainprocess=models.ForeignKey(Mainprocess_details,on_delete=models.CASCADE)
     process_name=models.CharField(max_length=1054)
     stage =models.PositiveIntegerField()
     tenant_id =models.PositiveIntegerField()
     financial_period=models.DateField(auto_now_add=True)
     worker_name=models.CharField(max_length=1054)
-    product_price=models.PositiveIntegerField()
+   
     def __str__(self):
         return str(self.id)
     
@@ -37,6 +98,7 @@ class Subprocess(models.Model) :
 class Production_card(models.Model):
     tenant_id=models.PositiveIntegerField()
     sub_process=models.ForeignKey(Subprocess,on_delete=models.CASCADE)
+    product_price=models.PositiveIntegerField()
     accepted_qty=models.FloatField()
     rework_qty=models.FloatField()
     rejected_qty= models.FloatField()

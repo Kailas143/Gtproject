@@ -13,6 +13,7 @@ urlpatterns = [
     path('process_card/<int:product_price>/',views.process_card.as_view(),name='process_card'),
     path('subprocess/create',views.Subprocess_create_API.as_view(),name='process_card'),
     path('process_card/po<int:poid>cmp<int:cmpid>/',views.process_card_details.as_view(),name='prod_price_subprocess'),
+    path('pcard/',views.prodcard_API.as_view())
 
 
 ]

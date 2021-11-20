@@ -1,15 +1,14 @@
 from rest_framework import serializers
 
 from .models import (Process, Processcost, Product, Product_price,
-                     Productrequirements, Productspec, Rawcomponent, Roles,
+                     Productrequirements, Productspec, Rawcomponent, 
                      company_details, supliers_contact_details)
-
+from drf_writable_nested.serializers import WritableNestedModelSerializer
 
 class Product_price_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Product_price
-        fields = ('id','product','company', 'price', 'expiry_price', 'expiry_status','tenant_id')
-
+        fields = '__all__'
     # def save(self):
     #     raw = Rawcomponent(
     #         tenant_id=self.validated_data.get('tenant_id'),
@@ -26,7 +25,7 @@ class Product_price_Serializer(serializers.ModelSerializer):
 class RawcomponentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rawcomponent
-        fields = ('tenant_id','rname', 'code', 'grade', 'main_component', 'material','worker_name')
+        fields = ('id','tenant_id','rname', 'code', 'grade', 'main_component', 'material','worker_name')
 
     def save(self):
         raw = Rawcomponent(
@@ -45,7 +44,7 @@ class RawcomponentSerializer(serializers.ModelSerializer):
 class RawcomponentUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rawcomponent
-        fields = ('rname', 'code', 'grade', 'main_component', 'material','worker_name')
+        fields = ('id','rname', 'code', 'grade', 'main_component', 'material','worker_name')
 
 
 class ProcesscostSerializer(serializers.ModelSerializer):
@@ -141,42 +140,6 @@ class ProductSerializer(serializers.ModelSerializer):
         )
         prod.save()
         return prod
-
-
-class ProductUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = '__all__'
-class ProductrequSerializer(serializers.ModelSerializer):
-     class Meta:
-        model = Productrequirements
-        fields = '__all__'
-
-class ProductrequirementsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Productrequirements
-        fields = ['tenant_id','product','raw_component','process','quantity','worker_name']
-
-    def save(self):
-        prodreq = Productrequirements(
-            product=self.validated_data.get('product'),
-            tenant_id=self.validated_data.get('tenant_id'),
-            worker_name=self.validated_data.get('worker_name'),
-            raw_component=self.validated_data.get('raw_component'),
-            process=self.validated_data.get('process'),
-            quantity=self.validated_data.get('quantity'),
-
-        )
-        prodreq.save()
-        return prodreq
-
-
-class ProductUpdaterequirementsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Productrequirements
-        fields = '__all__'
-
-
 class Company_detailsSerializer(serializers.ModelSerializer):
     class Meta : 
         model = company_details
@@ -206,6 +169,45 @@ class Company_detailsSerializer(serializers.ModelSerializer):
         )
         cd.save()
         return cd
+
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+class Product_price_latest_Serializer(serializers.ModelSerializer):
+    product=ProductSerializer()
+    company=Company_detailsSerializer()
+    class Meta:
+        model = Product_price
+        fields = '__all__'
+        
+class ProductrequSerializer(serializers.ModelSerializer):
+    product_price=Product_price_latest_Serializer()
+    class Meta:
+        model = Productrequirements
+        fields = ['id','tenant_id','product_price','raw_component','process','quantity','worker_name']
+
+class Product_requirements_Serializer(serializers.ModelSerializer):
+    raw_component=RawcomponentSerializer()
+    class Meta:
+        model = Productrequirements
+        fields='__all__'
+
+class ProductrequirementsSerializer(serializers.ModelSerializer):
+   
+    class Meta:
+        model = Productrequirements
+        fields='__all__'
+
+
+class ProductUpdaterequirementsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Productrequirements
+        fields = '__all__'
+
+
+
 class Company_detailsUpdateSerializer(serializers.ModelSerializer):
     class Meta : 
         model = company_details
@@ -234,11 +236,15 @@ class  Supliers_contactUpdateSerializer(serializers.ModelSerializer):
         model = supliers_contact_details
         fields = '__all__'
 
-
-class RolesSerializer(serializers.ModelSerializer) :
+class Prod_serializers(WritableNestedModelSerializer,serializers.ModelSerializer):
+    product=ProductSerializer()
+    company=Company_detailsSerializer()
     class Meta :
-        model = Roles
+        model= Product_price
         fields='__all__'
+
+
+
        
 
 # class UserSerializer(serializers.ModelSerializer) :

@@ -139,9 +139,17 @@ class process_card(APIView) :
 
 class Subprocess_create_API(generics.GenericAPIView,mixins.CreateModelMixin):
     serializer_class=Subprocess_serializer
+ 
 
     def post(self,request):
         return self.create(request)
+
+class prodcard_API(generics.GenericAPIView,mixins.CreateModelMixin,mixins.ListModelMixin):
+    serializer_class=Production_serializer
+    queryset=Production_card.objects.all()
+
+    def get(self,request):
+        return self.list(request)
 
 
 class process_card_details(APIView):
@@ -150,6 +158,7 @@ class process_card_details(APIView):
         services = 'admin'
         dynamic=dynamic_link(services,'price/product/po'+str(poid)+'cmp'+str(cmpid))
         response=requests.get(dynamic).json()
+        print(response,'rrr')
         # response=requests.get('http://127.0.0.1:8001/price/product/po'+str(poid)+'cmp'+str(cmpid)+'/').json()
         process_card_mainprocess=[]
         process_card_process=[]
@@ -160,6 +169,7 @@ class process_card_details(APIView):
             pp_id=r['id']
             print(pp_id)
             sub_process=Subprocess.objects.filter(product_price=pp_id)
+            print(sub_process,'sb')
             for s in sub_process :
                 sub_id=s.id
                 process_name=s.process_name

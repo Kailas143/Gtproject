@@ -45,10 +45,6 @@ class Product(models.Model):
     tenant_id=models.CharField(max_length=1024)
     pname =models.CharField('Product Name',max_length=1024)
     billed_name=models.CharField('Billed Name',max_length=1024)
-    cost =models.FloatField(blank=True)
-    IGST =models.FloatField(blank=True)
-    SGST =models.FloatField()
-    CGST =models.FloatField()
     code =models.CharField(max_length=200,unique=True)
     job_name=models.CharField(max_length=1024) 
     main_component=models.ForeignKey(Rawcomponent,on_delete=models.CASCADE)
@@ -75,8 +71,8 @@ class Productspec(models.Model) :
 class Process(models.Model): 
     tenant_id=models.PositiveIntegerField()
     process_name =models.CharField(max_length=1024)
-    test =models.CharField(max_length=1024)
-    cost =models.FloatField()
+    test = models.CharField(max_length=1024)
+    cost = models.FloatField()
     financial_period=models.DateField(auto_now=True)
     objects=models.Manager()
     period=FinancialQuerySet.as_manager()
@@ -86,16 +82,6 @@ class Process(models.Model):
         return self.process_name
     
 
-class Productrequirements(models.Model):
-    tenant_id=models.PositiveIntegerField()
-    product=models.ForeignKey(Product,on_delete=models.CASCADE)
-    raw_component = models.ForeignKey(Rawcomponent,on_delete=models.CASCADE)
-    process =models.ForeignKey(Process,on_delete=models.CASCADE)
-    quantity=models.FloatField()
-    financial_period=models.DateField(auto_now=True)
-    objects=models.Manager()
-    period=FinancialQuerySet.as_manager()
-    worker_name=models.CharField(max_length=1024)
 
 
 
@@ -124,7 +110,7 @@ class company_details(models.Model):
     branch_name = models.CharField(null=True,blank=True, max_length=1024)
     purchase_company = models.BooleanField(default=True)
     ratings=models.IntegerField(null=True)
-    vendor_code=models.CharField(null=True,blank=True, max_length=1024)
+    # vendor_code=models.CharField(null=False,max_length=224)
     description = models.TextField(null=True)
     financial_period=models.DateField(auto_now=True)
     objects=models.Manager()
@@ -139,6 +125,9 @@ class Product_price(models.Model) :
     product=models.ForeignKey(Product,on_delete=models.CASCADE)
     company=models.ForeignKey(company_details,on_delete=models.CASCADE)
     price=models.FloatField()
+    IGST =models.FloatField(blank=True)
+    SGST =models.FloatField(null=True)
+    CGST =models.FloatField(null=True)
     expiry_price=models.FloatField(null=True)
     expiry_status=models.BooleanField(default=False)
     financial_period=models.DateField(auto_now=True)
@@ -147,6 +136,16 @@ class Product_price(models.Model) :
     #     return self.product__pname
     
 
+class Productrequirements(models.Model):
+    tenant_id=models.PositiveIntegerField()
+    product_price=models.ForeignKey(Product_price,on_delete=models.CASCADE)
+    raw_component = models.ForeignKey(Rawcomponent,on_delete=models.CASCADE)
+    process =models.ForeignKey(Process,on_delete=models.CASCADE)
+    quantity=models.FloatField()
+    financial_period=models.DateField(auto_now=True)
+    objects=models.Manager()
+    period=FinancialQuerySet.as_manager()
+    worker_name=models.CharField(max_length=1024)
 
 class supliers_contact_details(models.Model):
     tenant_id=models.PositiveIntegerField()
@@ -163,19 +162,11 @@ class supliers_contact_details(models.Model):
     def __str__(self):
         return str(self.company_details) + '  -  ' + str(self.name) + '  -  ' + str(self.phone_no)+ '  -  ' + str(self.post)
 
-class Roles(models.Model):
-    roles=models.CharField(max_length=1024)
 
-    def __str__(self):
-        return self.roles
     
 
 
-class Employee(AbstractUser):
-    roles = models.ForeignKey(Roles,related_name='user_roles',on_delete=models.CASCADE,null=False)
 
-    def __str__(self):
-        return ' %s %s %s ' % (self.username, self.email,self.roles)
 
 
 

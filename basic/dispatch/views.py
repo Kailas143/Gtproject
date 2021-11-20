@@ -14,21 +14,48 @@ from store.serializers import Stock_History_Serializer, StockSerializer
 
 from .dynamic import dynamic_link
 from .models import Dispatch_details, Dispatch_materials
-from .serializers import (Dispatch_details_serializers,
+from .serializers import (Dispatch_details_serializers, Dispatch_materials_update_serializers,
                           Dispatch_materials_serializers)
 
 from .utilities import get_tenant
+
 
 # from rest_framework.authentication import (BasicAuthentication,
 #                                            SessionAuthentication,
 
 
-
-
-
 class Dispatch_MaterialsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
     # permission_classes = [IsAuthenticated]
-    serializer_class = Dispatch_materials_serializers
+    serializer_class =  Dispatch_materials_serializers
+    queryset = Dispatch_materials.objects.all()
+
+
+    def get(self, request):
+     
+            return self.list(request)
+
+class Dispatch_Materials_patch_API(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    
+    serializer_class =  Dispatch_materials_update_serializers
+    queryset = Dispatch_materials.objects.all()
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        queryset = Dispatch_materials.objects.filter(quality_checked=False)
+        return queryset
+    
+    def get(self,request,id):
+        return self.retrieve(request,id)
+      
+
+    def patch(self, request,id,*args, **kwargs):
+        return self.partial_update(request,id,
+         *args, **kwargs)
+
+
+class Dispatch_Materials_update_API(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    # permission_classes = [IsAuthenticated]
+    serializer_class =  Dispatch_materials_update_serializers
     queryset = Dispatch_materials.objects.all()
     lookup_field = 'id'
 
@@ -42,7 +69,7 @@ class Dispatch_MaterialsAPI(generics.GenericAPIView, mixins.CreateModelMixin, mi
 
         return self.create(request)
 
-    def put(self, request, id=None):
+    def put(self, request, id):
         return self.update(request, id)
 
     def delete(self, request, id):
@@ -167,30 +194,6 @@ class Stock_HistoryAPI(generics.GenericAPIView, mixins.ListModelMixin, mixins.Re
             return self.list(request)
 
 
-
-# class Dispatch_details_year(generics.GenericAPIView,mixins.ListModelMixin):
-#     serializer_class=Dispatch_details_serializers
-#     queryset=Dispatch_details.period.current_financialyear(current_finyear_start='2021-09-02',current_finyear_end='2021-09-03')
-
-#     def get(self,request):
-#         return self.list(request)
-
-# class Dispatch_materials_year(generics.GenericAPIView,mixins.ListModelMixin):
-#     serializer_class=Dispatch_materials_serializers
-#     queryset=Dispatch_materials.period.current_financialyear(current_finyear_start='2021-09-02',current_finyear_end='2021-09-03')
-
-#     def get(self,request):
-#         return self.list(request)
-
-# class Dispatch(APIView) :
-#     def get(self,request,id):
-#         response=requests.get('http://127.0.0.1:8000/product/requ/'+str(id)+'/').json()
-
-#         return Response(response)
-        #   response=requests.get('http://127.0.0.1:8000/branding/user/'+str(id)+'/').json()
-        # return Response(response)
-
-
 class Dispatch_post(generics.GenericAPIView, APIView):
     serializer_class = Dispatch_materials_serializers
     queryset = Dispatch_materials.objects.all()
@@ -279,28 +282,27 @@ class Dispatch_post(generics.GenericAPIView, APIView):
         print(mater_data)
         mydata=[]
         serializer = Dispatch_details_serializers(data=jsdata,context={'request': request})
-        print(jsdata['dispatch_number'])
         if serializer.is_valid():
-            tenant_id=get_tenant(request)
+            # tenant_id=get_tenant(request)
             data={}
-            print(jsdata['company_id'])
+            print(jsdata['company_id'],'___')
             company_id_r=jsdata['company_id']
-            dispatch_number_r=jsdata['dispatch_number']
-            dispatch=Dispatch_details.objects.filter(company_id=company_id_r,dispatch_number=dispatch_number_r).exists()
-            if dispatch : 
-                data["error"] = 'Sorry Company with dispatch number is already exist'
+            tenant_id_r=jsdata['tenant_id']
+            # dispatch=Dispatch_details.objects.current_financialyear(id=tenant_id_r).filter(company_id=company_id_r,dispatch_number=dispatch_number_r).exists()
+            # if dispatch : 
+            #     data["error"] = 'Sorry Company with dispatch number is already exist'
                 
-            else :
+            # else :
                  
-                data_dispatch=serializer.save(tenant_id=tenant_id)
-                for i in mater_data:
-                    materials=Dispatch_materials(dispatch_details=Dispatch_details.objects.get(id=data_dispatch.id),tenant_id=tenant_id,product_details=i['product_details'],qty=i['qty'],bal_qty=i['bal_qty'],error_qty=i['error_qty'])
+            data_dispatch=serializer.save(tenant_id=tenant_id_r)
+            for i in mater_data:
+                    materials=Dispatch_materials(dispatch_details=Dispatch_details.objects.get(id=data_dispatch.id),tenant_id=data_dispatch.tenant_id,product_details=i['product_details'],qty=i['qty'],bal_qty=i['bal_qty'],error_qty=i['error_qty'])
                     materials.save()
                     print(materials.qty)
                     prod_id=materials.product_details
                     qty=materials.qty
                     services='admin'
-                    dynamic=dynamic_link(services,'/product/requ/'+str(prod_id))
+                    dynamic=dynamic_link(services,'product/requ/'+str(prod_id))
                     response=requests.get(dynamic).json()
                     # response = requests.get('http://127.0.0.1:8001/product/requ/'+str(prod_id)+'/').json()
                     # print('http://127.0.0.1:8001/product/requ/'+str(prod_id)+'/')
@@ -310,9 +312,6 @@ class Dispatch_post(generics.GenericAPIView, APIView):
                         prod_req = r['raw_component']
                         prod_id = r['product']
                         print(prod_req)
-                        # serializer = StockSerializer(data=request.data)
-            #     # quantity_r = float(request.data['quantity'])
-            #     # raw_materials_r = request.data['raw_materials']
                         stock_data = Stock.objects.filter(
                                 raw_materials=prod_req).first()
 
@@ -326,7 +325,7 @@ class Dispatch_post(generics.GenericAPIView, APIView):
                             product = Stock.objects.filter(
                                         raw_materials=prod_req)
 
-                            stock_history = Stock_History(tenant_id=tenant_id, stock_id=product[0], instock_qty=float(
+                            stock_history = Stock_History(tenant_id=tenant_id_r, stock_id=product[0], instock_qty=float(
                                     product[0].quantity), after_process=float(
                                     product[0].quantity)-float(quantity_r), change_in_qty=quantity_r, process="dispatch")
                             stock_history.save()
@@ -337,7 +336,7 @@ class Dispatch_post(generics.GenericAPIView, APIView):
                         else:
 
                             product = Stock(
-                                    tenant_id=tenant_id, raw_materials=prod_req, quantity=quantity_r)
+                                    tenant_id=tenant_id_r, raw_materials=prod_req, quantity=quantity_r)
 
                             product.save()
                             print(product)
@@ -345,12 +344,10 @@ class Dispatch_post(generics.GenericAPIView, APIView):
                         
                             print(quantity_r)
 
-                            stock_history = Stock_History(tenant_id=tenant_id, stock_id=product, instock_qty=float(
+                            stock_history = Stock_History(tenant_id=tenant_id_r, stock_id=product, instock_qty=float(
                         quantity_r), after_process="0", change_in_qty="0", process="inward")
                             stock_history.save()
-                data["success"]="Record added succesfully"
-                #     return Response(data)
-                # return Response("Correct")
+            data["success"]="Record added succesfully"
         return Response(data)
         # self.dispatch_store_reduce(request,id=i.id,qty=i.qty)
         
@@ -374,3 +371,49 @@ class Dispatch_post(generics.GenericAPIView, APIView):
             # return Response(result_serializers.data)                                                                                                                                                                                                                                                                   .data, status=status.HTTP_201_CREATED)
 
 
+class Dispatch_Materials_patch(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    
+    serializer_class = Dispatch_materials_update_serializers
+    queryset = Dispatch_materials.objects.all()
+    lookup_field = 'id'
+
+    def get(self,request,id):
+        return self.retrieve(request,id)
+      
+
+    def patch(self, request,id,*args, **kwargs):
+        return self.partial_update(request,id,
+         *args, **kwargs)
+
+
+# class dispatch_material_quantity_patch(generics.GenericAPIView,APIView,mixins.RetrieveModelMixin):
+#     serializer_class = Dispatch_materials_update_serializers
+#     queryset = Dispatch_materials.objects.all()
+#     lookup_field = 'id'
+
+#     def get(self,request,id):
+#         return self.retrieve(request,id)
+    
+  
+class dispatch_material_quantity_patch(APIView,mixins.RetrieveModelMixin):
+    def get_object(self, pk):
+        dm=Dispatch_materials.objects.get(id=pk)
+        return dm
+    
+    def get(self,request,pk):
+        dc= self.get_object(pk)
+        serializer=Dispatch_materials_update_serializers(dc)
+        return Response(serializer.data)
+
+    def patch(self, request, pk):
+        testmodel_object = self.get_object(pk)
+        serializer_data=Dispatch_materials_update_serializers(testmodel_object)
+        data=serializer_data.data
+        bal_qty_r=data['bal_qty']
+        serializer = Dispatch_materials_update_serializers(testmodel_object, data=request.data, partial=True) # set partial=True to update a data partially
+        if serializer.is_valid():
+            update_bal_qty=float(request.data['bal_qty'])
+            new_bal_qty=bal_qty_r-update_bal_qty
+            serializer.save(bal_qty=new_bal_qty)
+            return Response(serializer.data)
+        return Response("wrong datas are given")

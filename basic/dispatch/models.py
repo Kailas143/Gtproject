@@ -5,22 +5,35 @@ from django.db import models
 # Create your models here.
 
 class FinancialQuerySet(models.QuerySet):
-    def current_financialyear(self,user):
+    def current_financialyear(self,id):
         year = datetime.datetime.now().year
         current_finyear_start= datetime.datetime(year, 4, 1)#current_finyear_start 2021
         current_finyear_end= datetime.datetime(year+1, 3, 31)#current_finyear_end 2022
-        return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=user.id)
+        return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=id)
+
+def dispatch_num():
+    lastreportnumber = Dispatch_details.objects.all().order_by('id').last()
+    if not lastreportnumber :
+        return 'DN0000'
+    report_no = lastreportnumber.dispatch_number
+    print(report_no,'rrr')
+    report_no_int = int(report_no.split('N')[-1])
+    print(report_no_int,'rep')
+  
+    newreportno_int=report_no_int +1
+    newreportno = 'DN000' + str(newreportno_int)
+    return newreportno
 
 class Dispatch_details(models.Model):
     
     tenant_id=models.PositiveIntegerField()
     company_id = models.SmallIntegerField()
-    dispatch_number = models.PositiveIntegerField(unique=True)
-    dispatch_date = models.DateTimeField(auto_now=True)
+    dispatch_number = models.CharField(max_length=1024,null=True,default=dispatch_num)
+    dispatch_date = models.DateField(auto_now=True)
     dispatch_worker = models.CharField(max_length=1024,null=True)
     financial_period=models.DateField(auto_now=True)
-    objects=models.Manager()
-    period=FinancialQuerySet.as_manager()
+    objects=FinancialQuerySet.as_manager()
+
 
 
     def __str__(self):
@@ -34,9 +47,10 @@ class Dispatch_materials(models.Model):
     qty = models.FloatField() 
     bal_qty= models.FloatField()
     error_qty= models.FloatField()
+    quality_checked=models.BooleanField(default=False)
     financial_period=models.DateField(auto_now=True)
-    objects=models.Manager()
-    period=FinancialQuerySet.as_manager()
+    objects=FinancialQuerySet.as_manager()
+  
 
 
     
