@@ -16,7 +16,7 @@ class Dispatch_materials_serializers(serializers.ModelSerializer):
     class Meta :
         model = Dispatch_materials
         fields=['id',"tenant_id","product_details","qty","bal_qty","error_qty","financial_period","dispatch_details",'quality_checked']
-
+    
 
 class Dispatch_materials_update_serializers(serializers.ModelSerializer):
    
@@ -26,4 +26,11 @@ class Dispatch_materials_update_serializers(serializers.ModelSerializer):
         fields='__all__'
         
       
+        
+class Dispatch_materials_newupdate_serializers(serializers.ModelSerializer):
+   
+    materials=Dispatch_materials_update_serializers(read_only=True,many=True)
+    class Meta :
+        model = Dispatch_details
+        fields=['id','materials']
         

@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+
 from inward.models import Dc_details, Dc_materials
 
 from .models import Stock, Stock_History
@@ -44,7 +45,7 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
         data = {}
         # serialization validation
         if serializer.is_valid():
-            tenant_id=get_tenant(request)
+            tenant_id=request.headers['tenant-id']
 
             quantity_r = float(request.data['quantity'])
             tenant_id_r=tenant_id
@@ -53,7 +54,7 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
             max_stock_r = float(request.data['max_stock'])
             avg_stock_r = float(request.data['avg_stock'])
             # filtering stock based on productdetails given by the user,first is given because filter is giving filtered list,here we need only single or first project 
-            stock_data = Stock.period.current_financialyear(id=tenant_id).filter(
+            stock_data = Stock.objects.current_financialyear(id=tenant_id,stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(
                 raw_materials=raw_materials_r).first()
 
             print(raw_materials_r)
@@ -64,7 +65,7 @@ class StockAPI(generics.GenericAPIView, APIView, mixins.CreateModelMixin):
 
                 product_qty = stock_data.quantity + float(quantity_r)
 
-                product = Stock.objects.filter(tenant_id=tenant_id_r,
+                product = Stock.objects.current_financialyear(id=tenant_id,stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(tenant_id=tenant_id_r,
                     raw_materials=raw_materials_r)
                 
                 # here new stock history record is occuring for every new updation of stock
@@ -130,3 +131,18 @@ class Stock_Year_Report(generics.GenericAPIView, mixins.ListModelMixin, mixins.R
 # class RegisterAPI(APIView):
 #     def post(self, request):
 #         return requests.get('http://127.0.0.1:8000/apigateway/register/').json()
+
+class stock_raw_materials(generics.GenericAPIView,mixins.ListModelMixin):
+    serializer_class=StockSerializer
+    queryset=Stock.objects.all()
+
+    def get_rawmaterials(self,rid):
+        stck=Stock.objects.filter(raw_materials=rid)
+        return stck
+    
+    def get(self,request,rid):
+        rd=self.get_rawmaterials(rid)
+        serializer=StockSerializer(rd,many=True)
+        return Response(serializer.data)
+
+    

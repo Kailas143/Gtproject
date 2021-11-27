@@ -9,6 +9,13 @@ class Product_price_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Product_price
         fields = '__all__'
+
+
+class RawcomponentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rawcomponent
+        fields = '__all__'
+
     # def save(self):
     #     raw = Rawcomponent(
     #         tenant_id=self.validated_data.get('tenant_id'),
@@ -22,24 +29,6 @@ class Product_price_Serializer(serializers.ModelSerializer):
     #     raw.save()
     #     return raw
 
-class RawcomponentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Rawcomponent
-        fields = ('id','tenant_id','rname', 'code', 'grade', 'main_component', 'material','worker_name')
-
-    def save(self):
-        raw = Rawcomponent(
-            tenant_id=self.validated_data.get('tenant_id'),
-            worker_name=self.validated_data.get('worker_name'),
-            rname=self.validated_data.get('rname'),
-            code=self.validated_data.get('code'),
-            grade=self.validated_data.get('grade'),
-            main_component=self.validated_data.get('main_component'),
-            material=self.validated_data.get('material')
-        )
-        raw.save()
-        return raw
-
 
 class RawcomponentUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,17 +41,7 @@ class ProcesscostSerializer(serializers.ModelSerializer):
         model = Processcost
         fields = '__all__'
 
-    def save(self):
-        processcost = Processcost(
-            tenant_id=self.validated_data.get('tenant_id'),
-            worker_name=self.validated_data.get('worker_name'),
-            process_name=self.validated_data.get('process_name'),
-            cycle_time=self.validated_data.get('cycle_time'),
-            type_of_tools=self.validated_data.get('type_of_tools'),
 
-        )
-        processcost.save()
-        return processcost
 
 
 class ProcesscostUpdateSerializer(serializers.ModelSerializer):
@@ -76,17 +55,7 @@ class ProcessSerializer(serializers.ModelSerializer):
         model = Process
         fields = '__all__'
 
-    def save(self):
-        process = Process(
-            tenant_id=self.validated_data.get('tenant_id'),
-            worker_name=self.validated_data.get('worker_name'),
-            process_name=self.validated_data.get('process_name'),
-            test=self.validated_data.get('test'),
-            cost=self.validated_data.get('cost'),
-
-        )
-        process.save()
-        return process
+ 
 
 
 class ProcessUpdateSerializer(serializers.ModelSerializer):
@@ -123,60 +92,28 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
-    def save(self):
-        prod = Product(
-            tenant_id=self.validated_data.get('tenant_id'),
-            worker_name=self.validated_data.get('worker_name'),
-            pname=self.validated_data.get('pname'),
-            billed_name=self.validated_data.get('billed_name'),
-            cost=self.validated_data.get('cost'),
-            IGST=self.validated_data.get('IGST'),
-            SGST=self.validated_data.get('SGST'),
-            CGST=self.validated_data.get('CGST'),
-            code=self.validated_data.get('code'),
-            job_name=self.validated_data.get('job_name'),
-            main_component=self.validated_data.get('main_component'),
-           
-        )
-        prod.save()
-        return prod
+   
+
+class Product_main_component_Serializer(serializers.ModelSerializer):
+    main_component=RawcomponentSerializer()
+    class Meta:
+        model = Product
+        fields = '__all__'
+
 class Company_detailsSerializer(serializers.ModelSerializer):
     class Meta : 
         model = company_details
         fields = '__all__'
     
-    def save(self):
-        cd = company_details(
-            tenant_id=self.validated_data.get('tenant_id'),
-            worker_name=self.validated_data.get('worker_name'),
-            company_name=self.validated_data.get('company_name'),
-            address_line1=self.validated_data.get('address_line1'),
-            address_line2=self.validated_data.get('address_line2'),
-            address_line3=self.validated_data.get('address_line3'),
-            office_email=self.validated_data.get('office_email'),
-            office_pnone_no =self.validated_data.get('office_pnone_no '),
-            gst_no=self.validated_data.get('gst_no'),
-            acc_no=self.validated_data.get('acc_no'),
-            ifsc_code=self.validated_data.get('ifsc_code'),
-            bank_name=self.validated_data.get('bank_name'),
-            branch_name=self.validated_data.get('quantity'),
-            purchase_company=self.validated_data.get('purchase_company'),
-            ratings=self.validated_data.get('ratings'),
-            vendor_code=self.validated_data.get('vendor_code'),
-            description=self.validated_data.get('description'),
-                
-
-        )
-        cd.save()
-        return cd
+   
 
 class ProductUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
 
-class Product_price_latest_Serializer(serializers.ModelSerializer):
-    product=ProductSerializer()
+class Product_price_latest_Serializer(WritableNestedModelSerializer,serializers.ModelSerializer):
+    product=Product_main_component_Serializer()
     company=Company_detailsSerializer()
     class Meta:
         model = Product_price
@@ -189,7 +126,9 @@ class ProductrequSerializer(serializers.ModelSerializer):
         fields = ['id','tenant_id','product_price','raw_component','process','quantity','worker_name']
 
 class Product_requirements_Serializer(serializers.ModelSerializer):
+    product_price=Product_price_latest_Serializer()
     raw_component=RawcomponentSerializer()
+    process=ProcessSerializer()
     class Meta:
         model = Productrequirements
         fields='__all__'
@@ -218,19 +157,7 @@ class Supliers_contactSerializer(serializers.ModelSerializer):
         model = supliers_contact_details
         fields='__all__'
     
-    def save(self):
-        sup = supliers_contact_details(
-            tenant_id=self.validated_data.get('tenant_id'),
-            worker_name=self.validated_data.get('worker_name'),
-            company_details=self.validated_data.get('company_details'),
-            email=self.validated_data.get('email'),
-            phone_no=self.validated_data.get('phone_no'),
-            name=self.validated_data.get('name'),
-            post =self.validated_data.get('post'),
 
-        )
-        sup.save()
-        return sup
 class  Supliers_contactUpdateSerializer(serializers.ModelSerializer):
     class Meta : 
         model = supliers_contact_details

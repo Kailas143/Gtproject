@@ -5,10 +5,18 @@ from django.db import models
 # Create your models here.
 
 class FinancialQuerySet(models.QuerySet):
-    def current_financialyear(self,id):
+    def current_financialyear(self,id,stdate,lstdate):
         year = datetime.datetime.now().year
-        current_finyear_start= datetime.datetime(year, 4, 1)#current_finyear_start 2021
-        current_finyear_end= datetime.datetime(year+1, 3, 31)#current_finyear_end 2022
+        print(stdate,'daaaat')
+        if(stdate == '' or lstdate == ''):
+            
+            current_finyear_start= datetime.datetime(year, 4, 1)
+            current_finyear_end= datetime.datetime(year+1, 3, 31)
+        else:
+           
+            current_finyear_start= stdate
+            current_finyear_end=lstdate
+
         return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=id)
 
 def dispatch_num():
@@ -27,7 +35,7 @@ def dispatch_num():
 class Dispatch_details(models.Model):
     
     tenant_id=models.PositiveIntegerField()
-    company_id = models.SmallIntegerField()
+    # company_id = models.SmallIntegerField()
     dispatch_number = models.CharField(max_length=1024,null=True,default=dispatch_num)
     dispatch_date = models.DateField(auto_now=True)
     dispatch_worker = models.CharField(max_length=1024,null=True)
@@ -42,7 +50,7 @@ class Dispatch_details(models.Model):
 
 class Dispatch_materials(models.Model):
     tenant_id=models.PositiveIntegerField()
-    dispatch_details =models.ForeignKey(Dispatch_details,on_delete=models.CASCADE)
+    dispatch_details =models.ForeignKey(Dispatch_details,related_name='materials',on_delete=models.CASCADE)
     product_details=models.PositiveIntegerField()
     qty = models.FloatField() 
     bal_qty= models.FloatField()

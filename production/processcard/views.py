@@ -161,41 +161,41 @@ from .utilities import get_tenant
 #         ser.save()
 #         print(ser)
 
-# class process_card_details(APIView):
-#     def get(self,request,poid,cmpid):
-#         data={}
-#         services = 'admin'
-#         dynamic=dynamic_link(services,'price/product/po'+str(poid)+'cmp'+str(cmpid))
-#         response=requests.get(dynamic).json()
-#         # response=requests.get('http://127.0.0.1:8001/price/product/po'+str(poid)+'cmp'+str(cmpid)+'/').json()
-#         process_card_mainprocess=[]
-#         process_card_process=[]
-#         accepted_qty_list=[]
-#         rework_qty_list=[]
-#         error_qty_list=[]
-#         for r in response :
-#             pp_id=r['id']
-#             print(pp_id)
-#             sub_process=Subprocess.objects.filter(product_price=pp_id)
-#             for s in sub_process :
-#                 sub_id=s.id
-#                 process_name=s.process_name
-#                 main_process_id=s.mainprocess
-#                 process_card_mainprocess.append(main_process_id)
-#                 process_card_process.append(process_name)
-#                 process_card=Production_card.objects.filter(sub_process=sub_id)
-#                 if process_card :
-#                     acc_qty=Production_card.objects.aggregate(total=Sum('accepted_qty'))['total']
-#                     print(acc_qty)
-#                     return Response("Total accepted_qty: " + str(acc_qty))
-#                 else : 
-#                     print('rr')
+class process_card_details(APIView):
+    def get(self,request,poid,cmpid):
+        data={}
+        services = 'admin'
+        dynamic=dynamic_link(services,'price/product/po'+str(poid)+'cmp'+str(cmpid))
+        response=requests.get(dynamic).json()
+        # response=requests.get('http://127.0.0.1:8001/price/product/po'+str(poid)+'cmp'+str(cmpid)+'/').json()
+        process_card_mainprocess=[]
+        process_card_process=[]
+        accepted_qty_list=[]
+        rework_qty_list=[]
+        error_qty_list=[]
+        for r in response :
+            pp_id=r['id']
+            print(pp_id)
+            sub_process=Subprocess.objects.filter(product_price=pp_id)
+            for s in sub_process :
+                sub_id=s.id
+                process_name=s.process_name
+                main_process_id=s.mainprocess
+                process_card_mainprocess.append(main_process_id)
+                process_card_process.append(process_name)
+                process_card=Production_card.objects.filter(sub_process=sub_id)
+                if process_card :
+                    acc_qty=Production_card.objects.aggregate(total=Sum('accepted_qty'))['total']
+                    print(acc_qty)
+                    return Response("Total accepted_qty: " + str(acc_qty))
+                else : 
+                    print('rr')
 
 
 
-#             # print(sub_process.process_name)
+            # print(sub_process.process_name)
 
-#         return Response(response)
+        return Response(response)
 
 
 class ProcessViewset(mixins.CreateModelMixin,mixins.RetrieveModelMixin,mixins.ListModelMixin,generics.GenericAPIView,APIView):

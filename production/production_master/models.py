@@ -7,10 +7,18 @@ from mptt.models import MPTTModel, TreeForeignKey
 # Create your models here.
 
 class FinancialQuerySet(models.QuerySet):
-    def current_financialyear(self,id):
+    def current_financialyear(self,id,stdate,lstdate):
         year = datetime.datetime.now().year
-        current_finyear_start= datetime.datetime(year, 4, 1)
-        current_finyear_end= datetime.datetime(year+1, 3, 31)
+        print(stdate,'daaaat')
+        if(stdate == '' or lstdate == ''):
+            
+            current_finyear_start= datetime.datetime(year, 4, 1)
+            current_finyear_end= datetime.datetime(year+1, 3, 31)
+        else:
+           
+            current_finyear_start= stdate
+            current_finyear_end=lstdate
+
         return self.filter(financial_period__gte=current_finyear_start,financial_period__lte=current_finyear_end,tenant_id=id)
 
 
@@ -48,7 +56,7 @@ class main_process(MPTTModel):
 
 class sub_process(models.Model) :
     tenant_id=models.PositiveIntegerField()
-    mainprocess=models.ForeignKey(main_process,on_delete=models.CASCADE)
+    mainprocess=models.ForeignKey(main_process,related_name='main',on_delete=models.CASCADE)
     product_price=models.PositiveIntegerField()
     process=models.PositiveIntegerField()
     order =models.IntegerField()

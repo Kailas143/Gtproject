@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='product_price',
             name='tenant_id',
-            field=models.PositiveIntegerField(default='1'),
+            field=models.PositiveIntegerField(),
             preserve_default=False,
         ),
     ]

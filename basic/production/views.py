@@ -18,13 +18,14 @@ class Main_process_API_View(generics.GenericAPIView,APIView) :
     serializer_class=Mainprocess_serializers
 
     def post(self,request) :
+        tenant_id_r=request.headers['tenant-id']
         main_process_r=request.data[0]
         sub_process_r=request.data[1]
         print(main_process_r)
         print(sub_process_r)
         serializer = Mainprocess_serializers(data=main_process_r)
         if serializer.is_valid():
-            main_process=serializer.save()
+            main_process=serializer.save(tenant_id=tenant_id_r)
             print(main_process.process_name)
             
             # print(outward)
@@ -35,7 +36,7 @@ class Main_process_API_View(generics.GenericAPIView,APIView) :
             for i in  sub_process_r :
                 # print(i)
                 # print(i['product'])
-                materials=Subprocess(mainprocess=Mainprocess.objects.get(id=main_process.id),tenant_id=i['tenant_id'],process_name =i['process_name'],stage=i['stage'],worker_name=i['worker_name'])
+                materials=Subprocess(mainprocess=Mainprocess.objects.get(id=main_process.id),tenant_id=tenant_id_r,process_name =i['process_name'],stage=i['stage'],worker_name=i['worker_name'])
                 materials.save()
             return Response("Success")
 

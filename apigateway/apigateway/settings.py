@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-1)du6n=8=8q_mw#5@c#9@2!syrfo!*kf$v-zc5_+^t0f0mhf@2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*','192.168.1.16','example.com','.example.com','172.16.16.56']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     # 'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'corsheaders'
+    'corsheaders',
+    'django_rest_passwordreset',
 ]
 
 MIDDLEWARE = [
@@ -103,8 +104,8 @@ DATABASES = {
        'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
                   }
-    }
-   
+    },
+
 }
 
 # Password validation
@@ -156,7 +157,7 @@ REST_FRAMEWORK={
     'DEFAULT_AUTHENTICATION_CLASSES':('rest_framework_simplejwt.authentication.JWTAuthentication',)
 }
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
    
 }
@@ -169,3 +170,4 @@ SIMPLE_JWT = {
 #  }
 CORS_ALLOW_ALL_ORIGINS = True 
 CORS_ALLOW_CREDENTIALS = True
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

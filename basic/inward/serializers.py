@@ -13,7 +13,7 @@ class Dc_details_serializers(serializers.ModelSerializer):
     inward_worker = serializers.HiddenField(default=serializers.CurrentUserDefault())
     class Meta:
         model = Dc_details
-        fields = ['company_id','dc_number','dc_date','inward_worker']
+        fields = '__all__'
 
      
 

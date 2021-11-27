@@ -17,8 +17,9 @@ from .dynamic import dynamic_link
 from .models import (Process, Processcost, Product, Product_price,
                      Productrequirements, Productspec, Rawcomponent,
                      company_details, supliers_contact_details)
-from .serializers import (Company_detailsSerializer,
+from .serializers import (Product_main_component_Serializer,Product_price_latest_Serializer,Company_detailsSerializer,
                           Company_detailsUpdateSerializer,
+                          ProcesscostSerializer, ProcesscostUpdateSerializer,
                           ProcesscostSerializer, ProcesscostUpdateSerializer,
                           ProcessSerializer, ProcessUpdateSerializer,
                           Product_price_Serializer,
@@ -36,41 +37,54 @@ from . utilities import get_tenant
 
 
 class ProcessCostAPI(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin,APIView):
-    serializer_class = ProcesscostSerializer
-    queryset=Processcost.objects.all()
+
 
     def get(self,request) :
-        return self.list(request)
+            queryset=Processcost.objects.current_financialyear(id=request.headers['tenant-id'],stdate=request.headers['sdate'],lstdate=request.headers['ldate'])
+            serializer= ProcesscostSerializer(queryset,many=True)
+            return Response(serializer.data)
+
     
     def post(self,request):
         serializer =  ProcesscostSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            tenant_id=get_tenant(request)
+            tenant_id=request.headers['tenant-id']
             serializer.save(tenant_id=tenant_id)
+            data['status']=True
             data["success"]="The record created successfully"
+        else :
+             data['status']=True
+             data['error']=serializer.errors
         return Response(data)
     
 
 class Product_price_API(generics.GenericAPIView,APIView,mixins.ListModelMixin,mixins.CreateModelMixin):
-    serializer_class=Product_price_Serializer
-    queryset=Product_price.objects.all()
 
+    
     def get(self,request) :
-        return self.list(request)
+            queryset=Product_price.objects.current_financialyear(id=request.headers['tenant-id'],stdate=request.headers['sdate'],lstdate=request.headers['ldate'])
+            serializer= Product_price_Serializer(queryset,many=True)
+            return Response(serializer.data)
     def post(self,request) :
+        print('llll')
         serializer =  Product_price_Serializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            tenant_id=get_tenant(request)
+            tenant_id=request.headers['tenant-id']
             company_r=request.data['company']
             product_r=request.data['product']
             prod=Product_price.objects.filter(product=product_r,company=company_r).exists()
             if prod :
                 data["error"]="The product for this company already exist"
             else :
+                print(tenant_id)
                 serializer.save(tenant_id=tenant_id)
+                data['status']=True
                 data["success"]="The record created successfully"
+        else :
+            data['status']=True
+            data['error']=serializer.errors
         
         return Response(data)
         
@@ -82,24 +96,45 @@ class ProcessCostUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
                 serializer_class = ProcesscostUpdateSerializer
                 queryset = Processcost.objects.all()
                 lookup_field ='id'
+                def get_id(self,id,request):
+                    pc=Processcost.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+                    return pc
                 def get(self,request,id):
-                    return self.retrieve(request,id)
+                    book = self.get_id(id,request)
+                    serializer = ProcesscostUpdateSerializer(book)
+                    return Response(serializer.data)
                 def put(self,request,id):
-                    return self.update(request,id)
+                    book = self.get_id(id,request)
+                    serializer = ProcesscostUpdateSerializer(book, data=request.data)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response(serializer.data)
+                    return Response(serializer.errors)
+
                 def destroy(self,request,id):
                     return self.destroy(request,id)
 
 
 class ProcessAPI(generics.GenericAPIView, mixins.CreateModelMixin):
     serializer_class = ProcessSerializer
+
+    def get(self,request):
+            queryset=Process.objects.current_financialyear(id=request.headers['tenant-id'],stdate=request.headers['sdate'],lstdate=request.headers['ldate'])
+            serializer= ProcessSerializer(queryset,many=True)
+            return Response(serializer.data)
+
     
     def post(self,request):
         serializer =   ProcessSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            tenant_id=get_tenant(request)
+            tenant_id=request.headers['tenant-id']
             serializer.save(tenant_id=tenant_id)
+            data['status']=True
             data["success"]="The record created successfully"
+        else :
+            data['status']=False
+            data['error']=serializer.errors
         return Response(data)
 
 
@@ -109,22 +144,38 @@ class ProcessUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
                 queryset = Process.objects.all()
                 lookup_field ='id'
 
+                def get_id(self,id,request):
+                    pc=Process.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+                    return pc
                 def get(self,request,id):
-                    return self.retrieve(request,id)
+                    book = self.get_id(id,request)
+                    serializer = ProcessUpdateSerializer(book)
+                    return Response(serializer.data)
                 def put(self,request,id):
-                    return self.update(request,id)
+                    book = self.get_id(id,request)
+                    serializer = ProcessUpdateSerializer(book, data=request.data)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response(serializer.data)
+                    return Response(serializer.errors)
                 def delete(self,request,id):
                     return self.destroy(request,id)
 
 
-class ProductspecAPI(generics.GenericAPIView, mixins.CreateModelMixin):
-    serializer_class = ProductspecSerializer
+class ProductspecAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin):
+
+
+    def get(self,request):
+        queryset=Productspec.objects.current_financialyear(id=request.headers['tenant-id'],stdate=request.headers['sdate'],lstdate=request.headers['ldate'])
+        serializer= ProductspecSerializer(queryset,many=True)
+        return Response(serializer.data)
+
     
     def post(self,request):
         serializer = ProductspecSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            tenant_id=get_tenant(request)
+            tenant_id=request.headers['tenant-id']
             serializer.save(tenant_id=tenant_id)
             data["success"]="The record created successfully"
         else : 
@@ -137,30 +188,44 @@ class ProductspecUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
                 queryset = Productspec.objects.all()
                 lookup_field ='id'
 
+                def get_id(self,id,request):
+                    pc=Productspec.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+                    return pc
                 def get(self,request,id):
-                    return self.retrieve(request,id)
+                    book = self.get_id(id,request)
+                    serializer = ProductspecUpdateSerializer(book)
+                    return Response(serializer.data)
                 def put(self,request,id):
-                    return self.update(request,id)
+                    book = self.get_id(id,request)
+                    serializer = ProductspecUpdateSerializer(book, data=request.data)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response(serializer.data)
+                    return Response(serializer.errors)
                 def delete(self,request,id):
                     return self.destroy(request,id)
 
 class RawAPI(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,mixins.RetrieveModelMixin):
-    serializer_class = RawcomponentSerializer
-    queryset =Rawcomponent.objects.all()
+   
     
     def get(self,request):
-        return self.list(request)
+         queryset =Rawcomponent.objects.current_financialyear(id=request.headers['tenant-id'],stdate=request.headers['sdate'],lstdate=request.headers['ldate'])
+         serializer= RawcomponentSerializer(queryset,many=True)
+         return Response(serializer.data)
 
     
     def post(self,request):
         serializer = RawcomponentSerializer(data=request.data)
+        tenant_id_r=request.headers['tenant-id']
         data = {}
         if serializer.is_valid():
-            tenant_id=get_tenant(request)
-            serializer.save(tenant_id=tenant_id)
+            tenant_id=request.headers['tenant-id']
+            serializer.save(tenant_id=tenant_id_r)
+            data['status']=True
             data["success"]="The record created successfully"
         else : 
-            data["error"]= "Error are occured !! Try again"
+            data['status']=True
+            data["error"]= serializer.errors
         return Response(data)
     
    
@@ -171,29 +236,68 @@ class RawAPIUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
                 serializer_class = RawcomponentUpdateSerializer
                 queryset = Rawcomponent.objects.all()
                 lookup_field ='id'
+                def get_id(self,id,request):
+                    pc=Rawcomponent.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+                    return pc
                 def get(self,request,id):
-                    return self.retrieve(request,id)
+                    book = self.get_id(id,request)
+                    serializer = RawcomponentUpdateSerializer(book)
+                    return Response(serializer.data)
                 def put(self,request,id):
-                    return self.update(request,id)
+                    book = self.get_id(id,request)
+                    serializer = RawcomponentUpdateSerializer(book, data=request.data)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response(serializer.data)
+                    return Response(serializer.errors)
                 def destroy(self,request,id):
                     return self.destroy(request,id)
 
 class ProductAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin):
-    serializer_class = ProductSerializer
-    queryset =Product.objects.all()
+   
 
     def get(self,request):
-        return self.list(request)
+        queryset =Product.objects.current_financialyear(id=request.headers['tenant-id'],stdate=request.headers['sdate'],lstdate=request.headers['ldate'])
+        serializer=ProductSerializer(queryset,many=True)
+        return Response(serializer.data)
     def post(self,request):
-        serializer =  ProductSerializer(data=request.data)
+        tenant_id_r=request.headers['tenant-id']
+        serializer = ProductSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            # tenant_id=get_tenant(request)
-            serializer.save()
+            tenant_id=request.headers['tenant-id']
+            print(tenant_id)
+            serializer.save(tenant_id=tenant_id_r)
             data["success"]="The record created successfully"
         else : 
-            data["error"]= "Error are occured !! Try again"
+            data["error"]= serializer.errors
         return Response(data)
+
+
+
+
+class Product_main_component(generics.GenericAPIView,mixins.UpdateModelMixin,
+                mixins.DestroyModelMixin,mixins.RetrieveModelMixin):
+                serializer_class =  Product_main_component_Serializer
+                queryset = Product.objects.all()
+                lookup_field ='id'
+
+                def get_id(self,id,request):
+                    pc=Product.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+                    return pc
+                def get(self,request,id):
+                    book = self.get_id(id,request)
+                    serializer = Product_main_component_Serializer(book)
+                    return Response(serializer.data)
+                def put(self,request,id):
+                    book = self.get_id(id,request)
+                    serializer = Product_main_component_Serializer(book, data=request.data)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response(serializer.data)
+                    return Response(serializer.errors)
+                def delete(self,request,id):
+                    return self.destroy(request,id)
 
 class ProductAPIUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
                 mixins.DestroyModelMixin,mixins.RetrieveModelMixin):
@@ -201,51 +305,69 @@ class ProductAPIUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
                 queryset = Product.objects.all()
                 lookup_field ='id'
 
+                def get_id(self,id,request):
+                    pc=Product.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+                    return pc
                 def get(self,request,id):
-                    return self.retrieve(request,id)
+                    book = self.get_id(id,request)
+                    serializer = ProductUpdateSerializer(book)
+                    return Response(serializer.data)
                 def put(self,request,id):
-                    return self.update(request,id)
+                    book = self.get_id(id,request)
+                    serializer = ProductUpdateSerializer(book, data=request.data)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response(serializer.data)
+                    return Response(serializer.errors)
                 def delete(self,request,id):
                     return self.destroy(request,id)
 
-class get_ProductreqAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin,mixins.RetrieveModelMixin):
-    serializer_class = ProductrequSerializer
-    queryset = Productrequirements.objects.all()
-    lookup_field ='id'
+class get_ProductreqAPI(generics.GenericAPIView,APIView):
+
 
                    
-    def get(self,request,id=None) :
-        if id :
-            return self.retrieve(request,id)
-        else :
-            return self.list(request)
+    
+    def get_id(self,id,request):
+            pc=Productrequirements.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+            return pc
+    def get(self,request,id):
+            book = self.get_id(id,request)
+            serializer = ProductrequSerializer(book)
+            return Response(serializer.data)
+    
 
 class company_id(generics.GenericAPIView,mixins.ListModelMixin,mixins.RetrieveModelMixin):
     queryset=company_details.objects.all()
     serializer_class=Company_detailsSerializer
     lookup_field ='id'
 
+    def get_id(self,id,request):
+            pc=Productrequirements.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+            return pc
     def get(self,request,id):
-        return self.retrieve(request,id)
+            book = self.get_id(id,request)
+            serializer = ProductrequSerializer(book)
+            return Response(serializer.data)
 
 
 class ProductreqAPI(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin):
-    serializer_class = ProductrequirementsSerializer
-    queryset = Productrequirements.objects.all()
+   
 
     def get(self,request) :
-        return self.list(request)
+            queryset = Productrequirements.objects.current_financialyear(id=request.headers['tenant-id'],stdate=request.headers['sdate'],lstdate=request.headers['ldate'])
+            serializer=ProductrequirementsSerializer(queryset,many=True)
+            return Response(serializer.data)
     def post(self,request):
         serializer = ProductrequirementsSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            # tenant_id=get_tenant(request)
-            serializer.save()
+            tenant_id=request.headers['tenant-id']
+            serializer.save(tenant_id=tenant_id)
             data['status']=True
             data["success"]="The record created successfully"
         else : 
             data['status']=False
-            data["error"]= "Error are occured !! Try again"
+            data["error"]= serializer.errors
         return Response(data)
 
 
@@ -255,66 +377,96 @@ class ProductreqUpdate(generics.GenericAPIView,mixins.UpdateModelMixin,
                 queryset = Productrequirements.objects.all()
                 lookup_field ='id'
 
+                def get_id(self,id,request):
+                    pc=Productrequirements.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+                    return pc
                 def get(self,request,id):
-                    return self.retrieve(request,id)
-                def put(self,request,id=None):
-                    return self.update(request,id)
+                        prodreq= self.get_id(id,request)
+                        serializer = ProductrequSerializer(prodreq)
+                        return Response(serializer.data)
+                def put(self,request,id):
+                    book = self.get_id(id,request)
+                    serializer = ProductrequSerializer(book, data=request.data)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response(serializer.data)
+                    return Response(serializer.errors)
                 def delete(self,request,id):
                     return self.destroy(request,id)
 
 class Company_detailsApi(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin):
-    serializer_class = Company_detailsSerializer
-    queryset = company_details.objects.all()
+  
 
-    def get(self,request,id=None):
-        return self.list(request)
+    def get(self,request):
+        queryset = company_details.objects.current_financialyear(id=request.headers['tenant-id'],stdate=request.headers['sdate'],lstdate=request.headers['ldate'])
+        serializers=Company_detailsSerializer(queryset,many=True)
+        return Response(serializers.data)
 
     def post(self,request):
         # return self.create(request)
+        datas=json.dumps(request.data)
+        tenant_id_r=request.headers['tenant-id']
         serializer = Company_detailsSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
+            if company_details.objects.filter(vendor_code=request.data['vendor_code']).exists():
+                data['status']=False
+                data["data"]= "Vendor code are repeated !! Try again"
+
         #     tenant_id=get_tenant(request)
         #     serializer.save(tenant_id=tenant_id)
-              serializer.save()
-              data['status']=True
-              data["data"]="The record created successfully"
+            else :
+                serializer.save(tenant_id=tenant_id_r)
+                print(request.data)
+                data['status']=True
+                data["data"]="The record created successfully"
         else : 
             data['status']=False
-            data["data"]= "Error are occured !! Try again"
+            print(request.data)
+            data["data"]= serializer.errors
         return Response(data)
 
 
 class Company_detailsUpdateApi(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin,mixins.UpdateModelMixin,
                 mixins.DestroyModelMixin,mixins.RetrieveModelMixin):
-    serializer_class=Company_detailsUpdateSerializer
-    queryset= company_details.objects.all()
-    lookup_field ='id'
+  
 
+    def get_id(self,id,request):
+                pc=company_details.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+                return pc
     def get(self,request,id):
-        return self.retrieve(request,id)
+            prodreq= self.get_id(id,request)
+            serializer = Company_detailsUpdateSerializer(prodreq)
+            return Response(serializer.data)
 
     def put(self,request,id):
-        return self.update(request,id)
+        book = self.get_id(id,request)
+        serializer = Company_detailsUpdateSerializer(book, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
     
     def delete(self,request,id):
         return self.destroy(request,id)
 
 class Supliers_contactApi(generics.GenericAPIView, mixins.CreateModelMixin,mixins.ListModelMixin):
-    serializer_class = Supliers_contactSerializer
-    queryset = supliers_contact_details.objects.all()
+ 
 
     def get(self,request,id=None):
-        return self.list(request)
-
+        queryset = supliers_contact_details.objects.current_financialyear(id=request.headers['tenant-id'],stdate=request.headers['sdate'],lstdate=request.headers['ldate'])
+        serializer = Supliers_contactSerializer(queryset,many=True)
+        return Response(serializer.data)
     def post(self,request):
         serializer = Supliers_contactSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            tenant_id=get_tenant(request)
+            tenant_id=request.headers['tenant-id']
             serializer.save(tenant_id=tenant_id)
+            data['status']=True
             data["success"]="The record created successfully"
         else : 
+            data['status']=False
             data["error"]= "Error are occured !! Try again"
         return Response(data)
 
@@ -324,90 +476,141 @@ class Supliers_contactUpdateApi(generics.GenericAPIView, mixins.CreateModelMixin
     queryset= supliers_contact_details.objects.all()
     lookup_field ='id'
 
+    def get_id(self,id,request):
+                pc=supliers_contact_details.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+                return pc
     def get(self,request,id):
-        return self.retrieve(request,id)
+            prodreq= self.get_id(id,request)
+            serializer = Supliers_contactUpdateSerializer(prodreq)
+            return Response(serializer.data)
 
-    def put(self,request,id=None):
-        return self.update(request,id)
+    def put(self,request,id):
+        book = self.get_id(id,request)
+        serializer = Supliers_contactUpdateSerializer(book, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
     
     def delete(self,request,id):
         return self.destroy(request,id)
 
 class Prodrequi(APIView):
-    def prod_req(self,pid):
-        prod=Productrequirements.objects.filter(product_price__id=pid)
+    def prod_req(self,pid,request):
+        prod=Productrequirements.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(product_price__id=pid)
         return prod
     
-    def get(self, request,pid):
+    def get(self,request,pid):
        
-        prod_id=self.prod_req(pid)
+        prod_id=self.prod_req(pid,request)
         
         serializer = ProductrequirementsSerializer(prod_id, many=True)
         return Response(serializer.data)
 
 class Prodrequi_raw(APIView):
-    def prod_req(self,rid):
-        prod=Productrequirements.objects.filter(raw_component__id=rid)
+    def prod_req(self,rid,request):
+        prod=Productrequirements.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(product_price__id=rid)
+
         return prod
     
-    def get(self, request,rid):
+    def get(self,request,rid):
        
-        prod_id=self.prod_req(rid)
+        prod_id=self.prod_req(rid,request)
         
         serializer = Product_requirements_Serializer(prod_id, many=True)
         return Response(serializer.data)
 
 
 
-class ProdReq(APIView):
-    def prod_req(self, product__id):
-        return Productrequirements.objects.filter(product_price__product__id=product__id)
-    # queryset = Productrequirements.objects.filter(product__id)
-    # serializer_class = ProductrequirementsSerializer
-    # lookup_fields = ('product__id',)
+# class ProdReq(APIView):
+#     def prod_req(self, product__id):
+#         return Productrequirements.objects.filter(product_price__product__id=product__id)
+#     # queryset = Productrequirements.objects.filter(product__id)
+#     # serializer_class = ProductrequirementsSerializer
+#     # lookup_fields = ('product__id',)
    
 
   
-    def get(self, request, product__id):
-        # response=requests.get('http://127.0.0.1:8001/dispatch/materials/').json()
+#     def get(self, request, product__id):
+#         # response=requests.get('http://127.0.0.1:8001/dispatch/materials/').json()
         
-        # resp_id=response['product_details']
-        prod_id=self.prod_req(product__id)
+#         # resp_id=response['product_details']
+#         prod_id=self.prod_req(product__id)
         
-        serializer = ProductrequirementsSerializer(prod_id, many=True)
-        return Response(serializer.data)
+#         serializer = ProductrequirementsSerializer(prod_id, many=True)
+#         return Response(serializer.data)
 
 class prod_price_company(APIView):
-    def company_filter(self,company):
-        return Product_price.objects.filter(company__id=company)
-    
+    def company_filter(self,request,company):
+        pp=Product_price.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(company__id=company)
+        return pp
+
     def get(self,request,company):
-        company_id=self.company_filter(company)
-        print('ffff')
+        print('xxxx')
+        print(company,'ccc')
+        company_id=self.company_filter(request,company)
+        print('jjj')
         serializer=Prod_serializers(company_id,many=True)
     
         return Response(serializer.data)
 
 class prod_price_product(APIView):
-    def product_filter(self,poid,cmpid):
-        return Product_price.objects.filter(product__id=poid,company__id=cmpid)
+    def product_filter(self,poid,cmpid,request):
+        print(request.headers)
+        return Product_price.objects.current_financialyear(id=request.headers['tenant-id'],stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(product__id=poid,company__id=cmpid)
     
     def get(self,request,poid,cmpid):
-        product_id=self.product_filter(poid,cmpid)
+        product_id=self.product_filter(poid,cmpid,request)
         serializer=Product_price_Serializer(product_id,many=True)
 
 
         return Response(serializer.data)
 
+
+
+
+class prod_price_id_update(generics.GenericAPIView,APIView,mixins.UpdateModelMixin,mixins.RetrieveModelMixin,mixins.ListModelMixin):
+    
+   
+    
+    def get_id(self,id,request):
+                pc=Product_price.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).get(id=id)
+                return pc
+    def get(self,request,id):
+            print('*&&&&&')
+            prodreq= self.get_id(id,request)
+            serializer = Product_price_Serializer(prodreq)
+            return Response(serializer.data)
+
+    def put(self,request,id):
+        book = self.get_id(id,request)
+        serializer = Product_price_Serializer(book, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+  
+
+
 class prod_price_id(APIView):
-    def id_filter(self,id):
-        return Product_price.objects.filter(id=id)
+    def id_filter(self,id,request):
+        pc=Product_price.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(id=id).first()
+        return pc
     
     def get(self,request,id):
-        prod_price_id=self.id_filter(id)
-        serializer=Product_price_Serializer(prod_price_id,many=True)
+        print('*****')
+        prod_price_id=self.id_filter(id,request)
+        serializer=Product_price_latest_Serializer(prod_price_id)
         return Response(serializer.data)
+        
 
+class Product_price_list(generics.GenericAPIView,mixins.ListModelMixin):
+
+
+    def get(self,request):
+        queryset=Product_price.objects.current_financialyear(id=request.headers['tenant-id'],stdate=request.headers['sdate'],lstdate=request.headers['ldate'])
+        serializer=Product_price_latest_Serializer(queryset,many=True)
+        return Response(serializer.data)
 
 class process_card_list(APIView) :
     def subprocess_filter(self,cmpid,poid) :
@@ -469,3 +672,15 @@ class process_card_list(APIView) :
 #         produ=self.comp_filter(cid)
 #         serializer=Product_price_Serializer(produ)
 #         return Response(serializer.data)
+
+class prod_req_process_id_product_id(APIView):
+    def prod_req(self,pid,prid,request):
+        prod=Productrequirements.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(product_price__id=pid,process__id=prid)
+        return prod
+    
+    def get(self,request,pid,prid):
+       
+        prod_id=self.prod_req(pid,prid,request)
+        
+        serializer = Product_requirements_Serializer(prod_id, many=True)
+        return Response(serializer.data)
