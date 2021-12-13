@@ -157,6 +157,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # Add extra responses here
         data['username'] = self.user.username
-        data['domain'] = self.user.tenant_company.domain
+        data['company'] = self.user.tenant_company.company_name
+        data['email']=self.user.email
        
         return data

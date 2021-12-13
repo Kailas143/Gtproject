@@ -27,11 +27,17 @@ class RolesManager(models.Manager):
 
 class Tenant_Company(models.Model):
     company_name = models.CharField(max_length=1024)
-    address = models.TextField()
     phone_number = models.CharField(max_length=10)
-    city = models.CharField(max_length=1024)
-    state = models.CharField(max_length=1024)
-    country = models.CharField(max_length=1024)
+    address_line1 = models.CharField(null=True, max_length=1024)
+    address_line2 = models.CharField(null=True, max_length=1024)
+    address_line3 = models.CharField(null=True, max_length=1024)
+    office_email = models.CharField(null=True,blank=True, max_length=1024)
+    office_pnone_no = models.CharField(null=True,blank=True, max_length=1024)
+    gst_no = models.CharField(null=True,blank=True, max_length=1024)
+    acc_no = models.CharField(null=True,blank=True, max_length=1024)
+    ifsc_code = models.CharField(null=True,blank=True, max_length=1024)
+    bank_name = models.CharField(null=True,blank=True, max_length=1024)
+    branch_name = models.CharField(null=True,blank=True, max_length=1024)
     joined_data = models.DateField(auto_now=True)
     domain = models.CharField(max_length=1024)
 
