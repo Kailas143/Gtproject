@@ -13,7 +13,11 @@ urlpatterns = [
     # path('login',views.LoginAPI.as_view(),name="LoginAPI"),
     # path('register/',views.RegisterAPI.as_view(),name="RegisterAPI"),
    
-    path('stock/history/',views.Stock_HistoryAPI.as_view(),name='Stock_historyApi')
+    path('stock/history/',views.Stock_HistoryAPI.as_view(),name='Stock_historyApi'),
+
+
+    ###  remove store stock after qc start 
+    path('storestock/price/req/',views.store_stock_update_for_qc_entry.as_view()),  
   
 
 ]

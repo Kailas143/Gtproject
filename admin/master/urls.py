@@ -23,6 +23,7 @@ urlpatterns = [
     path('product/<int:id>/',views.ProductAPIUpdate.as_view(),name='ProductUpdate'),
     path('product/main/<int:id>/',views.Product_main_component.as_view(),name='ProductUpdate'),
     path('product/price/',views.Product_price_API.as_view(),name='Productprice'),
+    path('product/price/patch/<int:id>/',views.Productpricepatch.as_view(),name='Productprice'),
     # path('product/price/<int:cid>/',views.prod_price_company.as_view(),name='Productprice'),
 
     path('price/company/<int:company>/',views.prod_price_company.as_view(),name='prod_price_company'),
@@ -33,6 +34,7 @@ urlpatterns = [
     path('price/update/<int:id>/',views.prod_price_id_update.as_view()),
    
 
+    path('add/product/req/',views.prod_req_raw_add.as_view()),
     path('product/req/',views.ProductreqAPI.as_view(),name='ProductreqAPI'),
     path('prod/req/<int:id>/',views.get_ProductreqAPI.as_view()),
     path('prod/req/pp<int:pid>pr<int:prid>/',views.prod_req_process_id_product_id.as_view()),
@@ -44,6 +46,11 @@ urlpatterns = [
     path('company/details/',views.Company_detailsApi.as_view(),name='Company_detailsApi'),
     path('company/details/<int:id>/',views.Company_detailsUpdateApi.as_view(),name='Company_detailsUpdateApi'),
     path('company/<int:id>/',views.company_id.as_view()),
+    path('purchase/company/list/',views.purchase_company_list.as_view()),
+
+    path('product/patch/<int:id>/',views.Productpatch.as_view()),
+    path('product/ppid<int:pid>raw<int:rcid>/',views.prod_id_raw_comp_id.as_view()),\
+    
 
     path('supplier/contact/',views.Supliers_contactApi.as_view(),name='Supliers_contactApi'),
     path('supplier/contact/<int:id>/',views.Supliers_contactUpdateApi.as_view(),name='Company_detailsUpdateApi'),

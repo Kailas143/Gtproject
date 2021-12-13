@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+from django.db.models.fields import PositiveBigIntegerField
 
 # Create your models here.
 
@@ -52,6 +53,7 @@ class Dispatch_materials(models.Model):
     tenant_id=models.PositiveIntegerField()
     dispatch_details =models.ForeignKey(Dispatch_details,related_name='materials',on_delete=models.CASCADE)
     product_details=models.PositiveIntegerField()
+    qc_report_id=models.PositiveIntegerField()
     qty = models.FloatField() 
     bal_qty= models.FloatField()
     error_qty= models.FloatField()

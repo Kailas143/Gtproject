@@ -3,6 +3,7 @@ import json
 import requests
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from requests import api
 from rest_framework import generics, mixins, status
 from rest_framework.authentication import (BasicAuthentication,
                                            SessionAuthentication,
@@ -11,7 +12,7 @@ from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from .dynamic import dynamic_link
 
 from inward.models import Dc_details, Dc_materials
 
@@ -145,4 +146,30 @@ class stock_raw_materials(generics.GenericAPIView,mixins.ListModelMixin):
         serializer=StockSerializer(rd,many=True)
         return Response(serializer.data)
 
-    
+class store_stock_update_for_qc_entry(APIView):
+    def post(self,request):
+        tenant_id_r=request.headers['tenant-id']
+        data = request.data
+        prod_price_id=data['product_price_id']
+        qty=data['lot_qty']
+        services='admin'
+        dynamic=dynamic_link(services,'prod/requ/'+str(prod_price_id))
+        response=requests.get(dynamic,headers={'tenant-id':request.headers['tenant-id'],'sdate':request.headers['sdate'],'ldate':request.headers['ldate']}).json()
+        print(response,'rreees')
+        for r in response:
+            quantity_r = float(r['quantity'])*float(qty)
+            prod_req = r['raw_component']
+            stock_data = Stock.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(
+                    raw_materials=prod_req).first()
+            print(stock_data.quantity,'qqq')
+            product_qty = float(stock_data.quantity) - float(quantity_r)
+            print(product_qty)
+
+            product = Stock.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(
+                        raw_materials=prod_req)
+            stock_history = Stock_History(tenant_id=tenant_id_r, stock_id=product[0], instock_qty=float(
+                    product[0].quantity), after_process=float(
+                    product[0].quantity)-float(quantity_r), change_in_qty=quantity_r, process="QC")
+            stock_history.save()
+            product.update(quantity=product_qty)
+        return Response(True)

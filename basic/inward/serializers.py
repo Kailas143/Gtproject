@@ -29,3 +29,12 @@ class Dc_materials_Update_serializers(WritableNestedModelSerializer,serializers.
     class Meta :
         model = Dc_materials
         fields='__all__'
+
+
+class Dc_materials_newupdate_serializers(serializers.ModelSerializer):
+   
+    materials=Dc_materials_Update_serializers(read_only=True,many=True)
+    class Meta :
+        model = Dc_details
+        fields=['id','company_id','dc_number','dc_date','materials','inward_worker']
+        

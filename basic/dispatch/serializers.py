@@ -32,5 +32,5 @@ class Dispatch_materials_newupdate_serializers(serializers.ModelSerializer):
     materials=Dispatch_materials_update_serializers(read_only=True,many=True)
     class Meta :
         model = Dispatch_details
-        fields=['id','materials']
+        fields=['id','dispatch_number','dispatch_date','materials','dispatch_worker']
         

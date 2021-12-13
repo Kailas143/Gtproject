@@ -18,7 +18,7 @@ from store.models import Stock, Stock_History
 from .dynamic import dynamic_link
 from .models import Dc_details, Dc_materials
 # Create your views here.
-from .serializers import (Dc_details_serializers, Dc_materials_serializers, Dc_materials_Update_serializers,
+from .serializers import (Dc_details_serializers,Dc_materials_newupdate_serializers, Dc_materials_serializers, Dc_materials_Update_serializers,
                           List_dc_serializers)
 from .utilities import get_tenant
 
@@ -232,7 +232,19 @@ class Dc_detailsAPI(generics.GenericAPIView,APIView):
         book.delete()
         return Response('Success')
 
+class Dc_details_materials(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    
 
+    def get_queryset(self,id,request):
+        queryset = Dc_details.objects.current_financialyear(int(request.headers['tenant-id']),request.headers['sdate'],request.headers['ldate']).filter(id=id)
+        return queryset
+    
+    def get(self,request,id):
+       
+        prod_id=self.get_queryset(id,request)
+        
+        serializer = Dc_materials_newupdate_serializers(prod_id, many=True)
+        return Response(serializer.data)
 
 # class Dc_details(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
     

@@ -37,7 +37,7 @@ class Dc_details(models.Model):
 
 class Dc_materials(models.Model):
     tenant_id=models.PositiveIntegerField()
-    dc_details =models.ForeignKey(Dc_details,on_delete=models.CASCADE)
+    dc_details =models.ForeignKey(Dc_details,on_delete=models.CASCADE,related_name='materials')
     raw_materials = models.PositiveIntegerField()
     qty = models.FloatField() 
     bal_qty= models.FloatField()

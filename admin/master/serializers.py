@@ -33,7 +33,7 @@ class RawcomponentSerializer(serializers.ModelSerializer):
 class RawcomponentUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rawcomponent
-        fields = ('id','rname', 'code', 'grade', 'main_component', 'material','worker_name')
+        fields = ('id','rname', 'code', 'grade', 'main_component', 'material','worker_name','unit','financial_period')
 
 
 class ProcesscostSerializer(serializers.ModelSerializer):
@@ -88,10 +88,17 @@ class ProductspecUpdateSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
+     
+     class Meta:
         model = Product
         fields = '__all__'
 
+
+class Product_maincomponent_Serializer(serializers.ModelSerializer):
+    main_component=RawcomponentSerializer()
+    class Meta:
+        model = Product
+        fields = '__all__'
    
 
 class Product_main_component_Serializer(serializers.ModelSerializer):
@@ -164,7 +171,7 @@ class  Supliers_contactUpdateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class Prod_serializers(WritableNestedModelSerializer,serializers.ModelSerializer):
-    product=ProductSerializer()
+    product=Product_main_component_Serializer()
     company=Company_detailsSerializer()
     class Meta :
         model= Product_price

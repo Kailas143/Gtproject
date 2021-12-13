@@ -154,10 +154,10 @@ class Dispatch_details_materials(generics.GenericAPIView, mixins.CreateModelMixi
     
 
     def get_queryset(self,id,request):
-        queryset = Dispatch_details.objects.current_financialyear(int(request.headers['tenant-id']),request.headers['sdate'],request.headers['ldate']).filter(id=id,quality_checked=False)
+        queryset = Dispatch_details.objects.current_financialyear(int(request.headers['tenant-id']),request.headers['sdate'],request.headers['ldate']).filter(id=id)
         return queryset
     
-    def get(self,id,request):
+    def get(self,request,id):
        
         prod_id=self.get_queryset(id,request)
         
@@ -367,57 +367,63 @@ class Dispatch_post(generics.GenericAPIView, APIView):
                  
             data_dispatch=serializer.save(tenant_id=tenant_id_r)
             for i in mater_data:
-                    materials=Dispatch_materials(dispatch_details=Dispatch_details.objects.get(id=data_dispatch.id),tenant_id=data_dispatch.tenant_id,product_details=i['product_details'],qty=i['qty'],bal_qty=i['bal_qty'],error_qty=i['error_qty'])
+                    materials=Dispatch_materials(dispatch_details=Dispatch_details.objects.get(id=data_dispatch.id),tenant_id=data_dispatch.tenant_id,product_details=i['product_details'],qty=i['qty'],bal_qty=i['bal_qty'],error_qty=i['error_qty'],qc_report_id=i['qc_report_id'])
                     materials.save()
-                    print(materials.qty)
-                    prod_price_id=materials.product_details
-                    qty=materials.qty
-                    services='admin'
-                    dynamic=dynamic_link(services,'prod/requ/'+str(prod_price_id))
-                    response=requests.get(dynamic,headers={'tenant-id':request.headers['tenant-id'],'sdate':request.headers['sdate'],'ldate':request.headers['ldate']}).json()
-                    for r in response:
-                        print(r,'rrr')
-                        quantity_r = r['quantity']*qty
-                        print(quantity_r)
-                        prod_req = r['raw_component']
+                    # print(materials.qty)
+                    # prod_price_id=materials.product_details
+                    # print(prod_price_id,'kkk')
+                    # qty=materials.qty
+                    # services='admin'
+                    # dynamic=dynamic_link(services,'prod/requ/'+str(prod_price_id))
+                    # response=requests.get(dynamic,headers={'tenant-id':request.headers['tenant-id'],'sdate':request.headers['sdate'],'ldate':request.headers['ldate']}).json()
+                    # print(response,'rreees')
+                    # for r in response:
+                    #     print(r,'rrr')
+                    #     print(qty,'qtyyyyyy')
+                    #     print(r['quantity'],'rquan')
+                    #     quantity_r = float(r['quantity'])*float(qty)
+                    #     print(quantity_r,'qrrrr')
+                    #     prod_req = r['raw_component']
                       
-                        print(prod_req)
-                        stock_data = Stock.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(
-                                raw_materials=prod_req).first()
+                    #     print(prod_req)
+                    #     stock_data = Stock.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(
+                    #             raw_materials=prod_req).first()
 
-                        print(stock_data)
+                    #     print(stock_data)
 
-                        if stock_data:
+                    #     if stock_data:
+                    #         print(stock_data.quantity,'qqq')
+                    #         product_qty = float(stock_data.quantity) - float(quantity_r)
+                    #         print(product_qty)
 
-                            product_qty = stock_data.quantity - float(quantity_r)
-                            print(product_qty)
+                    #         product = Stock.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(
+                    #                     raw_materials=prod_req)
+                    #         print(product,'*****')
 
-                            product = Stock.objects.current_financialyear(id=int(request.headers['tenant-id']),stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(
-                                        raw_materials=prod_req)
-
-                            stock_history = Stock_History(tenant_id=tenant_id_r, stock_id=product[0], instock_qty=float(
-                                    product[0].quantity), after_process=float(
-                                    product[0].quantity)-float(quantity_r), change_in_qty=quantity_r, process="dispatch")
-                            stock_history.save()
-                            product.update(quantity=product_qty)
-
-                        
-
-                        else:
-
-                            product = Stock(
-                                    tenant_id=tenant_id_r, raw_materials=prod_req, quantity=quantity_r)
-
-                            product.save()
-                            print(product)
+                    #         stock_history = Stock_History(tenant_id=tenant_id_r, stock_id=product[0], instock_qty=float(
+                    #                 product[0].quantity), after_process=float(
+                    #                 product[0].quantity)-float(quantity_r), change_in_qty=quantity_r, process="dispatch")
+                    #         stock_history.save()
+                    #         print(product_qty,'prr')
+                    #         product.update(quantity=product_qty)
 
                         
-                            print(quantity_r)
 
-                            stock_history = Stock_History(tenant_id=tenant_id_r, stock_id=product, instock_qty=float(
-                        quantity_r), after_process="0", change_in_qty="0", process="inward")
-                            stock_history.save()
-            data["success"]="Record added succesfully"
+                    #     else:
+
+                    #         product = Stock(
+                    #                 tenant_id=tenant_id_r, raw_materials=prod_req, quantity=quantity_r)
+
+                    #         product.save()
+                    #         print(product)
+
+                        
+                    #         print(quantity_r)
+
+                    #         stock_history = Stock_History(tenant_id=tenant_id_r, stock_id=product, instock_qty=float(
+                    #     quantity_r), after_process="0", change_in_qty="0", process="inward")
+                    #         stock_history.save()
+            data["success"]=True
         else : 
             data['error'] = serializer.errors
         return Response(data)
@@ -498,7 +504,6 @@ class dispatch_material_quantity_patch(APIView,mixins.RetrieveModelMixin):
         if serializer.is_valid():
             update_bal_qty=float(request.data['bal_qty'])
             new_bal_qty=bal_qty_r-update_bal_qty
-            print(new_bal_qty)
             serializer.save(bal_qty=new_bal_qty)
             print(serializer.data,'dd')
             return Response(serializer.data)
@@ -508,37 +513,42 @@ class company_dispatch(generics.GenericAPIView,APIView,mixins.CreateModelMixin, 
     
     
     def get(self,request,cid):
+        print('---------- cid dispatch')
         data_list=[]
         tenant_id_r=int(request.headers['tenant-id'])
         services='admin'
         dynamic=dynamic_link(services,'price/company/' + str(cid))
         response=requests.get(dynamic,headers={'tenant-id':request.headers['tenant-id'],'sdate':request.headers['sdate'],'ldate':request.headers['ldate']}).json()
         print(response,'rrress')
-        ppid=[]
         for r in response :
             ppid=r['id']
-        queryset = Dispatch_materials.objects.current_financialyear(id=tenant_id_r,stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(product_details=ppid).exclude(bal_qty=0)
-        serializer=Dispatch_materials_serializers(queryset,many=True)
-        print(serializer.data,'------')
-        if(len(serializer.data)!=0): 
-            for d in serializer.data: 
-                data_list.append(d) 
+            services='admin'
+            dynamic=dynamic_link(services,'price/'+str(ppid))
+            response=requests.get(dynamic,headers={'tenant-id':request.headers['tenant-id'],'sdate':request.headers['sdate'],'ldate':request.headers['ldate']}).json()
+            dispatch_acc_qty = Dispatch_materials.objects.current_financialyear(id=tenant_id_r,stdate=request.headers['sdate'],lstdate=request.headers['ldate']).filter(product_details=ppid).aggregate(Sum('bal_qty'))['bal_qty__sum']
+            response['dis_qty'] = dispatch_acc_qty
+            data_list.append(response)
+        # serializer=Dispatch_materials_serializers(queryset)
+        # print(serializer.data,'------')
+        # if(len(serializer.data)!=0): 
+        #     for d in serializer.data: 
+        #         data_list.append(d) 
             
-        for d in data_list :
-            print(d,'**')
-            reid=d['product_details']
-            print(reid,'66666666')
-            services='admin'
-            dynamic=dynamic_link(services,'product/req/'+str(reid))
-            response=requests.get(dynamic,headers={'tenant-id':request.headers['tenant-id'],'sdate':request.headers['sdate'],'ldate':request.headers['ldate']}).json()
-            print(response,'$$$')
-            d['product_details']=response
-            vv= (d['product_details'])
-            services='admin'
-            dynamic=dynamic_link(services,'price/'+str(vv['product_price']['id']))
-            print(dynamic,'&&&&&&')
-            response=requests.get(dynamic,headers={'tenant-id':request.headers['tenant-id'],'sdate':request.headers['sdate'],'ldate':request.headers['ldate']}).json()
-            vv['product_price']=response
+        # for d in data_list :
+        #     print(d,'**')
+        #     reid=d['product_details']
+        #     print(reid,'66666666')
+        #     services='admin'
+        #     dynamic=dynamic_link(services,'product/req/'+str(reid))
+        #     response=requests.get(dynamic,headers={'tenant-id':request.headers['tenant-id'],'sdate':request.headers['sdate'],'ldate':request.headers['ldate']}).json()
+        #     print(response,'$$$')
+        #     d['product_details']=response
+        #     vv= (d['product_details'])
+        #     services='admin'
+        #     dynamic=dynamic_link(services,'price/'+str(vv['product_price']['id']))
+        #     print(dynamic,'&&&&&&')
+        #     response=requests.get(dynamic,headers={'tenant-id':request.headers['tenant-id'],'sdate':request.headers['sdate'],'ldate':request.headers['ldate']}).json()
+        #     vv['product_price']=response
         return Response(data_list)
     
 
@@ -593,3 +603,14 @@ class dispatch_product(APIView):
     def get(self,request,ppid):
         tqty=self.product_price_id(ppid,request)["qty__sum"]
         return Response(tqty)
+
+
+class dispatch_material_qc_update(APIView):
+    def patch(self, request, dis_mat_id):
+        testmodel_object = self.get_object(dis_mat_id)
+        serializer = Dispatch_materials_update_serializers(testmodel_object, data=request.data, partial=True) # set partial=True to update a data partially
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response("wrong datas are given")
+

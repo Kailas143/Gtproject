@@ -27,7 +27,11 @@ urlpatterns = [
     path('materials/product/<int:ppid>/',views.dispatch_product.as_view()),
 
 
-    path('materials/delete/<int:id>',views.Dispatch_Materials_delete.as_view())
+    path('materials/delete/<int:id>',views.Dispatch_Materials_delete.as_view()),
+
+
+    ### qc status patch internal
+    path('qc_status_patch/<int:dis_mat_id>',views.dispatch_material_qc_update.as_view()),
 
 
     # path('material/product/<int:id>/',views.dispatch_material_product_details.as_view())#get product and product price details based on material pid

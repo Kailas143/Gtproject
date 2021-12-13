@@ -2,6 +2,7 @@ import datetime
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.fields import CharField
 
 
 # Create your models here.
@@ -36,6 +37,7 @@ class FinancialQuerySet(models.QuerySet):
 class Rawcomponent(models.Model): 
     tenant_id=models.PositiveIntegerField(null=True,blank=True)
     rname =models.CharField(max_length=1024)
+    unit=models.CharField(max_length=200,null=True,blank=True)
     code =models.CharField(max_length=200,unique=True)
     grade =models.CharField(max_length=1024)
     main_component=models.BooleanField(default=True)
@@ -58,7 +60,7 @@ class Product(models.Model):
     main_component=models.ForeignKey(Rawcomponent,on_delete=models.CASCADE)
     worker_name=models.CharField(max_length=1024)
     financial_period=models.DateField(auto_now=True)
-    unit=models.FloatField()
+    unit=models.CharField(max_length=1024,null=True)
     objects=FinancialQuerySet.as_manager()
  
 
@@ -115,12 +117,12 @@ class company_details(models.Model):
     bank_name = models.CharField(null=True,blank=True, max_length=1024)
     branch_name = models.CharField(null=True,blank=True, max_length=1024)
     purchase_company = models.BooleanField(default=True)
-    ratings=models.IntegerField(null=True)
-    vendor_code=models.CharField(null=False,max_length=224)
+    ratings=models.IntegerField(null=True,blank=True)
+    vendor_code=models.CharField(null=True,blank=True,max_length=224)
     description = models.TextField(null=True)
     financial_period=models.DateField(auto_now=True)
     objects=FinancialQuerySet.as_manager()
-    worker_name=models.CharField(max_length=1024)
+    worker_name=models.CharField(max_length=1024,blank=True,null=True)
    
     def __str__(self):
         return str(self.company_name) + '  -  ' + str(self.purchase_company) + '  -  ' + str(self.gst_no) + '  -  ' + str(self.id)
@@ -146,7 +148,7 @@ class Productrequirements(models.Model):
     tenant_id=models.PositiveIntegerField(null=True,blank=True)
     product_price=models.ForeignKey(Product_price,on_delete=models.CASCADE)
     raw_component = models.ForeignKey(Rawcomponent,on_delete=models.CASCADE)
-    process =models.ForeignKey(Process,on_delete=models.CASCADE)
+    process =models.ForeignKey(Process,on_delete=models.CASCADE,null=True,blank=True)
     quantity=models.FloatField()
     financial_period=models.DateField(auto_now=True)
     objects=FinancialQuerySet.as_manager()

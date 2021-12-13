@@ -14,6 +14,7 @@ urlpatterns = [
    
     path('dc/details/add/',views.DC_details_add.as_view(),name='DC_details_add'),
     path('user/<str:domain>/',views.user_tenant.as_view(),name='user_tenant'),
+    path('dc/details/<int:id>/',views.Dc_details_materials.as_view(),name='DC_details_add'),
 
 
     # path('dc/material/quality/<int:id>/',views.Dc_materials_quality.as_view()),
